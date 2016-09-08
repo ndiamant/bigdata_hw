@@ -1,0 +1,10 @@
+*.cls
+macros.tex
+*.csv
+*.pdf
+*.aux
+*.fls
+*.log
+*.out
+*.gz
+*latexmk
