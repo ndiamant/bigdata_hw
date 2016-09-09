@@ -112,16 +112,45 @@ features.
         We will begin by expanding the norms.
             \begin{align*}
                 ||A\xx - \bb||_2^2 + ||\Gamma\xx||_2^2 &= (A\xx - \bb)^\T(A\xx - \bb) + (\Gamma \xx)^\T \Gamma \xx \\
-                &= \xx^\T A^\T A \xx - 2 \xx A^\T \bb - \xx^\T \Gamma^\T \Gamma \xx \\ 
+                &= \xx^\T A^\T A \xx - \xx^\T A^\T \bb - \bb^\T A \xx + \xx^\T \Gamma^\T \Gamma \xx \\ 
             \end{align*}
         Now we take the gradient with respect to $\xx$ and set to zero,
             \begin{align*}
-                \nabla_\xx \left[ \xx^\T A^\T A \xx - 2 \xx A^\T \bb - \xx^\T \Gamma^\T \Gamma \xx  \right]&= 2AA^\T \xx -2A^\T \bb + 2\Gamma^\T \Gamma \xx = 0\\
-                \left( AA^\T + \Gamma^\T \Gamma \right) \xx &= A^\T\bb \\
-                \xx &= \left( AA^\T + \Gamma^\T \Gamma \right)^{-1} A^\T\bb
+                \nabla_\xx \left[ \xx^\T A^\T A \xx - \xx^\T A^\T \bb - \bb^\T A \xx + \xx^\T \Gamma^\T \Gamma \xx  \right]&= 0\\
+                 \nabla_\xx \tr \left[ \xx^\T A^\T A \xx - \xx^\T A^\T \bb - \bb^\T A \xx + \xx^\T \Gamma^\T \Gamma \xx  \right] &= 0 \text{   Using trace of scalar $a$ equals $a$} \\
+                 \nabla_\xx \left[ \tr \xx^\T A^\T A \xx - 2\tr \xx^\T A^\T \bb + \tr \xx^\T \Gamma^\T \Gamma \xx  \right] &= 0 \text{   Using $\tr A = \tr A^\T$}\\
+                 2A^\T A \xx -2A^\T \bb + 2\Gamma^\T \Gamma \xx &= 0\\
+                 \left( A^\T A + \Gamma^\T \Gamma \right) \xx &= A^\T\bb \\
+                 \xx &= \left( A^\T A + \Gamma^\T \Gamma \right)^{-1} A^\T \bb
             \end{align*}
-        \item
-                    
+        Which is our closed form solution for $\xx$.
+    \item
+
+    \item
+        We will begin by distributing the norm.
+        \begin{align*}
+            ||A\xx + \bb -\yy||_2^2 + ||\Gamma\xx||_2^2 &= (A\xx + \bb -\yy)^\T(A\xx + \bb -\yy) + (\Gamma \xx)^\T \Gamma \xx\\
+            &= \xx^\T A^\T A \xx + 2 \xx^\T A^\T \bb - 2 \xx^\T A^\T \yy -2 \yy^\T \bb + \bb^\T \bb + \yy^T \yy + \xx^\T \Gamma^\T \Gamma \xx
+        \end{align*}
+        Now we take the gradient and set to zero.
+        \begin{align*}
+            \nabla_\xx \left[ \xx^\T A^\T A \xx + 2 \xx^\T A^\T \bb - 2 \xx^\T A^\T \yy -2 \yy^\T \bb + \bb^\T \bb + \yy^T \yy + \xx^\T \Gamma^\T \Gamma \xx \right] &= 0\\
+            2A^\T A \xx + 2 A^\T \bb - 2 A^\T \yy + 2\Gamma^\T \Gamma \xx &= 0 \\
+            (A^\T A + \Gamma^\T \Gamma)\xx &= A^\T (\yy  - \bb) \\
+            (A^\T A + \Gamma^\T \Gamma)^{-1}A^\T (\yy  - \bb) &= \xx
+        \end{align*}
+        Which gives our closed form. To find the bias term, we solve for $\bb$. This yields,
+        \begin{align*}
+            (A^\T A + \Gamma^\T \Gamma)\xx &= \yy^\T A - \bb^\T A \\
+            \bb &= A^{-1}(\yy^\T A - (A^\T A + \Gamma^\T \Gamma)\xx)
+        \end{align*}
+        
+        To find the bias term in part (b), we will set the first column of $A = 1$ and the upper left value of $\Gamma^\T \Gamma$ to zero, to avoid regularizing the bias term. Doing this means that the first term of $\xx$ will be the bias term. Doing this makes 
+    \item
+        As we saw in part (d), the gradient with respect to $\xx $is
+            $$ \xx(A^\T A + \Gamma^\T \Gamma) + A^\T( \bb - \yy )$$.
+        And the gradient with respect to $\bb$ can be quickly found from the start of part (d).
+            $$\nabla_\bb \left[ \xx^\T A^\T A \xx - 2 \xx A^\T \yy + \xx^\T \Gamma^\T \Gamma \xx + 2\xx A^\T \bb + \yy^\T \yy \right] = 2\xx A^\T$$
 
 \end{enumerate}
 
