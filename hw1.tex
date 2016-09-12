@@ -129,28 +129,35 @@ features.
     \item
         We will begin by distributing the norm.
         \begin{align*}
-            ||A\xx + \bb -\yy||_2^2 + ||\Gamma\xx||_2^2 &= (A\xx + \bb -\yy)^\T(A\xx + \bb -\yy) + (\Gamma \xx)^\T \Gamma \xx\\
-            &= \xx^\T A^\T A \xx + 2 \xx^\T A^\T \bb - 2 \xx^\T A^\T \yy -2 \yy^\T \bb + \bb^\T \bb + \yy^T \yy + \xx^\T \Gamma^\T \Gamma \xx
+            ||A\xx + b\1 -\yy||_2^2 + ||\Gamma\xx||_2^2 &= (A\xx + b\1 -\yy)^\T(A\xx + b\1 -\yy) + (\Gamma \xx)^\T \Gamma \xx\\
+            &= \xx^\T A^\T A \xx + 2 \xx^\T A^\T b\1 - 2 \xx^\T A^\T \yy -2 \yy^\T b\1 + b\1^\T b\1 \\ &\qquad + \yy^T \yy + \xx^\T \Gamma^\T \Gamma \xx
         \end{align*}
         Now we take the gradient and set to zero.
         \begin{align*}
-            \nabla_\xx \left[ \xx^\T A^\T A \xx + 2 \xx^\T A^\T \bb - 2 \xx^\T A^\T \yy -2 \yy^\T \bb + \bb^\T \bb + \yy^T \yy + \xx^\T \Gamma^\T \Gamma \xx \right] &= 0\\
-            2A^\T A \xx + 2 A^\T \bb - 2 A^\T \yy + 2\Gamma^\T \Gamma \xx &= 0 \\
-            (A^\T A + \Gamma^\T \Gamma)\xx &= A^\T (\yy  - \bb) \\
-            (A^\T A + \Gamma^\T \Gamma)^{-1}A^\T (\yy  - \bb) &= \xx
+            \nabla_\xx \left[ \xx^\T A^\T A \xx + 2 \xx^\T A^\T b\1 - 2 \xx^\T A^\T \yy -2 \yy^\T b\1 + b\1^\T b\1 + \yy^T \yy + \xx^\T \Gamma^\T \Gamma \xx \right] &= 0\\
+            2A^\T A \xx + 2 A^\T b\1 - 2 A^\T \yy + 2\Gamma^\T \Gamma \xx &= 0 \\
+            (A^\T A + \Gamma^\T \Gamma)\xx &= A^\T (\yy  - b\1) \\
+            (A^\T A + \Gamma^\T \Gamma)^{-1}A^\T (\yy  - b\1) &= \xx
         \end{align*}
-        Which gives our closed form. To find the bias term, we solve for $\bb$. This yields,
+        Which gives our closed form. Now to solve for the bias terms we will take the derivative with respect to $b$ and set to zero.
         \begin{align*}
-            (A^\T A + \Gamma^\T \Gamma)\xx &= \yy^\T A - \bb^\T A \\
-            \bb &= A^{-1}(\yy^\T A - (A^\T A + \Gamma^\T \Gamma)\xx)
+            \frac{d}{db} \left[  \xx^\T A^\T A \xx + 2 \xx^\T A^\T b\1 - 2 \xx^\T A^\T \yy -2 \yy^\T b\1 + b\1^\T b\1 + \yy^T \yy + \xx^\T \Gamma^\T \Gamma \xx \right] &= 0\\
+            2 \xx^\T A^\T\1 -2\yy^\T\1 +2 b N &= 0 \\
+             \frac{\yy^\T\1 - \xx^\T A^\T\1}{N} &= b
         \end{align*}
-        
-        To find the bias term in part (b), we will set the first column of $A = 1$ and the upper left value of $\Gamma^\T \Gamma$ to zero, to avoid regularizing the bias term. Doing this means that the first term of $\xx$ will be the bias term. Doing this makes 
+        Where $N$ is the number of training points. Now we have a system of two equations. If we substitute the solution for $b$ into the solution for $\xx$, then we get the solution for $x$, which we could plug back into the solution for $b$ to get our answer. To do so, we will use the fact that, because it is a scalar, $\xx^\T A^\T\1 = \1^\T A \xx$
+        \begin{align*}
+            2A^\T A \xx + 2 A^\T b\1 - 2 A^\T \yy + 2\Gamma^\T \Gamma \xx &= 0 \\
+            A^\T A \xx + A^\T \frac{\yy^\T\1 - \1^\T A \xx}{N}\1 - A^\T \yy + \Gamma^\T \Gamma \xx &= 0
+        \end{align*}
+
     \item
-        As we saw in part (d), the gradient with respect to $\xx $is
-            $$ \xx(A^\T A + \Gamma^\T \Gamma) + A^\T( \bb - \yy )$$.
-        And the gradient with respect to $\bb$ can be quickly found from the start of part (d).
-            $$\nabla_\bb \left[ \xx^\T A^\T A \xx - 2 \xx A^\T \yy + \xx^\T \Gamma^\T \Gamma \xx + 2\xx A^\T \bb + \yy^\T \yy \right] = 2\xx A^\T$$
+        As we saw in part (d), the gradient with respect to $\xx$ is
+            $$ (A^\T A + \Gamma^\T \Gamma)\xx - A^\T (\yy  - b\1)$$
+        And the derivative with respect to $b$ is 
+            $$2 \xx^\T A^\T\1 -2\yy^\T\1 +2 b N$$
+        So we will randomly initialize the weights for $\xx$ and $b$ normally with mean $0$ and then subtract the gradient and derivative respectively each step.
+
 
 \end{enumerate}
 
@@ -227,8 +234,22 @@ $q(x|\thetab)$ be some model. Show that $\argmin_q \KL(\PP_{emp} || q)$ is obtai
 $q(x) = q(x ; \hat\thetab)$ where $\hat\thetab = \argmax_{\thetab} \;\Lc(q, \Dc)$ is
 the maximum likelihood estimate.
 
+\vspace{15mm}
+We begin with definition of $\KL$ divergence.
+\begin{align*}
+    \KL(\PP_{emp} || q) &= \int_{-\infty}^{\infty}\PP_{emp}(x)\log \left(\frac{\PP_{emp}(x)}{q(x)} \right)dx\\
+    &= \int_{-\infty}^{\infty}\PP_{emp}(x)\log(\PP_{emp}(x))dx - \int_{-\infty}^{\infty}\PP_{emp}(x)\log(q(x))dx\\
+\end{align*}
+We have no control over the first term, so for the purpose of our minimization problem it becomes a constant. Constants do not change optimization problems. Then all we are left with is the second term. If we expand using the defininition of the empirical distribution, we get,
 
+    $$- \int_{-\infty}^{\infty}\PP_{emp}(x)\log(q(x))dx = -\frac{1}{N}\sum_{i=1}^{N}\delta_{x_i}(A)log(q(A))$$
 
+Where $N$ is the number of data points. We are trying to minimize a negative value, which is equivalent to maximizing the positive of the same value. We also know that $\frac{1}{N}$ is a positive constant. That means that if we take $\exp(\sum_{i=1}^{N}\delta_{x_i}(A)log(q(A)))$, it will be an equivalent maximization problem. This yields,
+\begin{align*}
+    exp(\frac{1}{N}\sum_{i=1}^{N}\delta_{x_i}(A)log(q(A))) &= \prod_{i=1}^N \exp(\delta_i(A))\exp(\log(q(A))\\
+    &= \prod_{i=1}^N \exp(\delta_i(A)) \prod_{i=1}^N q(A)
+\end{align*}
+Again, $\prod_{i=1}^N \exp(\delta_i(A))$ is a positive constant, so we can ignore it in our maximization. That leaves only the product of $q(A)$ to maximize. But $\prod_{i=1}^N q(A) = \Lc(q,\Dc)$, so we have shown that maximizing the likelihood is equivalent to minimizing the KL divergence between the empirical distribution and our model.
 
 \newpage
 
