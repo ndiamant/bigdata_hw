@@ -95,17 +95,24 @@ features.
 \begin{enumerate}[(a)]
     \item 
         We will begin by taking the log of $\Nc$.
-            $$\log(\Nc(x|\mu,\sigma^2)) = \log\left(\frac{1}{\sqrt{2\pi\sigma^2}}\exp\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)\right)=-\frac{(x-\mu)^2}{2\sigma^2}\log(C)$$
-            Where $\log(C)/2\sigma^2$ is some positive constant we will account for later. So our problem becomes,
-                $$\argmax_\ww \sum_{i=1}^N \log\Nc(y_i | w_0 + \ww^\T\xx_i, \sigma^2) + \sum_{j=1}^D \log\Nc(w_j | 0, \tau^2) =$$
-                $$  \argmax_\ww -\sum_{i=1}^N (y_i-(w_0 + \ww^\T\xx_i))^2 - \sum_{j=1}^D (\omega_j)^2$$
-            And $\sum_{j=1}^D (\omega_j)^2 = \ww \ww^\T = ||\ww||_2^2$ and maximizing the negative is the same as minimizing the positive, so we get,
-                $$  \argmin_\ww \sum_{i=1}^N (y_i-(w_0 + \ww^\T\xx_i))^2 + k ||\ww||_2^2$$
-            Where $k$ accounts for the constant referred to earlier and can be scaled to make the problem equivalent to,
+            \begin{align*}
+               \log(\Nc(x|\mu,\sigma^2)) &= \log\left(\frac{1}{\sqrt{2\pi\sigma^2}}\exp\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)\right)\\
+               &=-\frac{(x-\mu)^2}{2\sigma^2} \log\left( \frac{1}{\sqrt{2\pi\sigma^2}} \right)\\
+               &= \frac{(x-\mu)^2}{2\sigma^2} - \log \left( \sqrt{2 \pi }\sigma \right)
+            \end{align*}
+            
+            So our problem becomes,
+                
+                $$\argmax_\ww \sum_{i=1}^N \log\Nc(y_i | w_0 + \ww^\T\xx_i, \sigma^2) + \sum_{j=1}^D \log\Nc(w_j | 0, \tau^2) - N\log \left( \sqrt{2 \pi }\sigma \right) - D\log \left( \sqrt{2 \pi }\tau \right) $$ \\
+                $$\argmax_\ww -\frac{1}{2\sigma^2}\sum_{i=1}^N (y_i-(w_0 + \ww^\T \xx_i))^2 - \frac{1}{2 \tau^2 } \sum_{j=1}^D (\omega_j)^2$$
+            
+            We can factor out the $1/2$, multiply by $\sigma^2$ and $\sum_{j=1}^D (\omega_j)^2 = \ww \ww^\T = ||\ww||_2^2$ and maximizing the negative is the same as minimizing the positive, so we get,
+                $$  \argmin_\ww \sum_{i=1}^N (y_i-(w_0 + \ww^\T\xx_i))^2 + \frac{\sigma^2}{\tau^2} ||\ww||_2^2$$
+            Now we substitute $\lambda = \frac{\sigma^2}{\tau^2}$,
                 \[
-                \argmin \frac{1}{N}\sum_{i=1}^N (y_i - (w_0 + \ww^\T\xx_i))^2 + \lambda ||\ww||_2^2
+                \argmin \sum_{i=1}^N (y_i - (w_0 + \ww^\T\xx_i))^2 + \lambda||\ww||_2^2
                 \]
-            As desired.
+            as desired.
     \item
         To solve the following problem, we will take the gradient with respect to $\xx$ and set it to zero,
             $$\text{minimize: } ||A\xx - \bb||_2^2 + ||\Gamma\xx||_2^2$$
@@ -148,7 +155,9 @@ features.
         Where $N$ is the number of training points. Now we have a system of two equations. If we substitute the solution for $b$ into the solution for $\xx$, then we get the solution for $x$, which we could plug back into the solution for $b$ to get our answer. To do so, we will use the fact that, because it is a scalar, $\xx^\T A^\T\1 = \1^\T A \xx$
         \begin{align*}
             2A^\T A \xx + 2 A^\T b\1 - 2 A^\T \yy + 2\Gamma^\T \Gamma \xx &= 0 \\
-            A^\T A \xx + A^\T \frac{\yy^\T\1 - \1^\T A \xx}{N}\1 - A^\T \yy + \Gamma^\T \Gamma \xx &= 0
+            (A^\T A + \Gamma^\T \Gamma)\xx + \frac{\1^\T \yy - \1^\T A \xx}{N}A^\T \1 - A^\T \yy  &= 0\\
+            \left(A^\T A + \Gamma^\T \Gamma -\frac{A^\T\1\1^\T A}{N}\right)\xx + \frac{\1^\T \yy - \1^\T A \xx}{N}A^\T \1 - A^\T \yy  &= 0\\
+            \xx =  \left(A^\T A + \Gamma^\T \Gamma -\frac{A^\T\1\1^\T A}{N}\right)^{-1} \left(A^\T \yy - \frac{\1^\T \yy - \1^\T A \xx}{N}A^\T \1 \right)
         \end{align*}
 
     \item
@@ -276,8 +285,8 @@ The first term is just the expected value of $\xx$ and the second integral by de
 As desired.\\\\
 
 Now to find the covariance. The covariance matrix,
-    $$cov(\yy) = \EE[(\yy - \EE(\yy)(\yy - \EE(\yy)^\T]$$. 
-We can calculate $(\yy - \EE(\yy)$ from the previous part.
+    $$\cov(\yy) = \EE[(\yy - \EE(\yy)(\yy - \EE(\yy)^\T]$$. 
+We can calculate $\yy - \EE(\yy)$ from the previous part.
     $$(\yy - \EE(\yy) = A\xx + \bb - (A\EE[\xx] + \bb) = A(\xx - \EE[\xx])$$
 Now we can find $cov(\yy)$,
     $$cov(\yy) = \EE[A(\xx - \EE[\xx])(A(\xx - \EE[\xx]))^\T] = \EE[A(\xx - \EE[\xx])(\xx - \EE[\xx])^\T A^\T]$$
