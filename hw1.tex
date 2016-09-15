@@ -156,8 +156,7 @@ features.
         \begin{align*}
             2A^\T A \xx + 2 A^\T b\1 - 2 A^\T \yy + 2\Gamma^\T \Gamma \xx &= 0 \\
             (A^\T A + \Gamma^\T \Gamma)\xx + \frac{\1^\T \yy - \1^\T A \xx}{N}A^\T \1 - A^\T \yy  &= 0\\
-            \left(A^\T A + \Gamma^\T \Gamma -\frac{A^\T\1\1^\T A}{N}\right)\xx + \frac{\1^\T \yy - \1^\T A \xx}{N}A^\T \1 - A^\T \yy  &= 0\\
-            \xx =  \left(A^\T A + \Gamma^\T \Gamma -\frac{A^\T\1\1^\T A}{N}\right)^{-1} \left(A^\T \yy - \frac{\1^\T \yy - \1^\T A \xx}{N}A^\T \1 \right)
+            \xx =  \left(A^\T A + \Gamma^\T \Gamma -\frac{A^\T\1\1^\T A}{N}\right)^{-1} \left(A^\T \yy - \frac{A^\T \1 \1^T \yy}{N} \right)
         \end{align*}
 
     \item
@@ -211,14 +210,26 @@ where \texttt{pix-ij} is the pixel in the \texttt{ith} row and \texttt{jth} colu
 
 \newpage
 
-\textbf{3} (\textbf{Murphy 2.11}) Derive the normalization constant ($Z$) for a one dimensional
-zero-mean Gaussian
-\[
-    \PP(x; \sigma^2) = \frac{1}{Z}\exp\left(-\frac{x^2}{2\sigma^2}\right).
-\]
+\textbf{3} (\textbf{Murphy 2.11} and \textbf{2.16})
+\begin{enumerate}[(a)]
+    \item Derive the normalization constant ($Z$) for a one dimensional
+        zero-mean Gaussian
+        \[
+            \PP(x; \sigma^2) = \frac{1}{Z}\exp\left(-\frac{x^2}{2\sigma^2}\right)
+        \]
+        such that $\PP(x; \sigma^2)$ becomes a valid density.
+    \item Suppose $\theta \sim \text{Beta}(a,b)$ such
+        that
+        \[
+            \PP(\theta; a,b) = \frac{1}{B(a,b)} \theta^{a-1}(1-\theta)^{b-1} = \frac{\Gamma(a+b)}{\Gamma(a)\Gamma(b)} \theta^{a-1}(1-\theta)^{b-1}
+        \]
+        where $B(a,b) = \Gamma(a)\Gamma(b)/\Gamma(a+b)$ is the Beta function
+        and $\Gamma(x)$ is the Gamma function.
+        Derive the mean, mode, and variance of $\theta$.
+\end{enumerate}
 
 \begin{solution}
-	We have to find $Z$ such that
+	(a) We have to find $Z$ such that
 	$$\int_{-\infty}^{\infty}\frac{1}{Z}\exp\left(-\frac{x^2}{2\sigma^2}\right)dx = 1$$
 	This means that
 	$$\int_{-\infty}^{\infty}\exp\left(-\frac{x^2}{2\sigma^2}\right)dx = Z$$
@@ -230,8 +241,43 @@ zero-mean Gaussian
 	$$ = \int_{0}^{2\pi}\int_{0}^{\infty}\exp\left(-\frac{r^2}{2\sigma^2}\right)rdrd\theta $$
 	Now we can use a u-substition, $u=r^2/(2\sigma^2)$, $du = r/\sigma^2dr$. This yields,
 	$$Z^2 = -2\pi \sigma^2 \left[ e^{-u} \right]_0^\infty$$
-	So $\fbox{$Z=\sigma\sqrt{2\pi}$}$
-	\end{solution}
+	So $\fbox{$Z=\sigma\sqrt{2\pi}$}$\\
+
+    (b) The mean is calculated by integrating over the support of the distribution,
+        \begin{align*}
+            \EE(\theta) &= \frac{1}{B(a,b)} \int_{\SS} \theta \theta^{a-1}(1-\theta)^{b-1} d\theta \\
+            &=  \frac{1}{B(a,b)} \int_{0}^1 \theta^{a}(1-\theta)^{b-1} d\theta
+        \end{align*}
+    But $\frac{1}{B(a,b)}$ normalizes $\int_{\SS} \theta^{a-1}(1-\theta)^{b-1} d\theta$, so $\frac{1}{B(a+1,b)}$ normalizes $\int_{0}^1 \theta^{a}(1-\theta)^{b-1} d\theta$. So,
+        \begin{align*}
+            \EE(\theta) &= \frac{1}{B(a,b)} B(a+1,b) \\
+            &= \frac{\Gamma(a+b)}{\Gamma(a)\Gamma(b)} \frac{\Gamma(a+1)\Gamma(b)}{\Gamma(a + b +1)}\\
+            &= a\frac{\Gamma(a+b)}{\Gamma(a)\Gamma(b)} \frac{\Gamma(a)\Gamma(b)}{(a+b)\Gamma(a + b)}\\
+            &= \frac{a}{a+b}
+        \end{align*}
+        Now we find the variance. 
+        \begin{align*}
+            \sigma^2 &= \EE(\theta^2) - \EE(\theta)^2 \\
+            &= \frac{1}{B(a,b)} \int_{0}^1 \theta^2 \theta^{a - 1}(1-\theta)^{b-1} d\theta - \EE(\theta)^2\\
+            &= \frac{1}{B(a,b)} B(a+2,b) - \EE(\theta)^2 \\
+            &= \frac{\Gamma(a+b)}{\Gamma(a)\Gamma(b)} \frac{\Gamma(a+2)\Gamma(b)}{\Gamma(a + b + 2)} - \EE(\theta)^2 \\
+            &= \frac{\Gamma(a+b)}{\Gamma(a)\Gamma(b)} \frac{(a+1)(a)\Gamma(a)\Gamma(b)}{(a + b +1)(a+b)\Gamma(a + b)} - \EE(\theta)^2\\
+            &= \frac{a(a+1)}{(a+b+1)(a+b)} - \frac{a^2}{(a+b)^2}\\
+            &= \frac{a(a+1)(a+b)-(a+b+1)a^2}{(a+b)^2(a+b+1)}\\
+            &= \frac{a b}{(a+b)^2 (a+b+1)} \text{  Thanks Mathematica}
+        \end{align*}
+        Now we find the mode. To find the mode, we set the derivative to zero.
+            \begin{align*}
+                \frac{d}{d \theta} \frac{1}{B(a,b)} \theta^{a-1}(1-\theta)^{b-1} &= 0\\
+                (a-1)\theta^{a-2}(1-\theta)^{b-1} - (b-1)\theta^{a-1}(1-\theta)^{b-2}&=0\\   
+            \end{align*}
+        We will ignore the $\theta = 0,1$ solutions, because they represent minima of the distribution. 
+            \begin{align*}
+                ((1-\theta)(a-1) + \theta(b-1))\theta^{a-2}\theta^{b-2} &= 0\\
+                ((1-\theta)(a-1) + \theta(b-1)) &= 0\\
+                \theta &= \frac{a-1}{a+b-2} \text{ Thanks again, Mathematica}
+            \end{align*}
+    \end{solution}
 
 \newpage
 
@@ -299,12 +345,18 @@ As desired.
 
 
 
-\textbf{6} (\textbf{Murphy 2.16}) Suppose $\theta \sim \text{Beta}(a,b)$ such
-that
-\[
-    \PP(\theta; a,b) = \frac{1}{B(a,b)} \theta^{a-1}(1-\theta)^{b-1} = \frac{\Gamma(a+b)}{\Gamma(a)\Gamma(b)} \theta^{a-1}(1-\theta)^{b-1}
-\]
-Derive the mean, mode, and variance of $\theta$.
+\textbf{6} Given the dataset $\Dc = \{(x,y)\} = \{(0,1), (2,3), (3,6), (4,8)\}$
+\begin{enumerate}[(a)]
+    \item Find the least squares estimate $y = \thetab^\T\xx$ by hand using
+        Cramer's Rule.
+    \item Use the normal equations to find the same solution and verify it
+        is the same as part (a).
+    \item Plot the data and the optimal linear fit you found.
+    \item Find randomly generate 100 points near the line with white Gaussian
+        noise and then compute the least squares estimate (using a computer).
+        Verify that this new line is close to the original and plot the new
+        dataset, the old line, and the new line.
+\end{enumerate}
 
 \newpage
 
