@@ -358,6 +358,76 @@ As desired.
         dataset, the old line, and the new line.
 \end{enumerate}
 
+\vspace{15mm}
+
+\begin{enumerate}[(a)]
+    \item 
+        The closed form solution can be found using the closed form:
+        \begin{align*}
+            (A^\T A)\thetab &= A^\T \yy \\
+            \left(
+                \begin{bmatrix} 
+                1 & 1 & 1 & 1\\
+                0 & 2 & 3 & 4          
+                \end{bmatrix}
+                \begin{bmatrix} 
+                1 & 0 \\
+                1 & 2 \\
+                1 & 3 \\
+                1 & 4\\          
+                \end{bmatrix}              
+                \right)\thetab
+                &= 
+                \begin{bmatrix} 
+                1 & 1 & 1 & 1\\
+                0 & 2 & 3 & 4          
+                \end{bmatrix} 
+                \begin{bmatrix}
+                1 \\
+                3 \\
+                6 \\
+                8 \\ 
+                \end{bmatrix}\\
+                \begin{bmatrix}
+                 4 & 9 \\
+                 9 & 29 \\
+                \end{bmatrix} \thetab
+                &= 
+                \begin{bmatrix}
+                 18 \\
+                 56 \\
+                \end{bmatrix}\\
+        \end{align*}
+        Now we use Cramer's rule. First, 
+        $$\begin{vmatrix}
+                 4 & 9 \\
+                 9 & 29 \\
+            \end{vmatrix} = 35 = D$$.
+        \begin{align*}
+            \theta_1 &= \frac{
+                \begin{vmatrix}
+                    18 & 9\
+                    56 & 29
+                \end{vmatrix}
+            }{D} = 18/35\\
+            \theta_2 &= \frac{
+                \begin{vmatrix}
+                    4 & 18\
+                    9 & 56
+                \end{vmatrix}
+            }{D} =62/35
+        \end{align*}
+         
+    \item
+        Now we use $\thetab = (A^\T A)^{-1}A^\T \yy$. Mathematica gives 
+        $\theta = \left(
+\begin{array}{c}
+ \frac{18}{35} \\
+ \frac{62}{35} \\
+\end{array}
+\right)$.
+         
+\end{enumerate}
 \newpage
 
 \textbf{7} (\textbf{Murphy 8.3}) Gradient and Hessian of the log-likelihood for
@@ -380,15 +450,37 @@ logistic regression.
 \begin{solution}
 	\begin{enumerate}[(a)]
 		\item 
-			We start by using the chaing rule:
+			We start by using the chain rule:
 			$$\sigma'(x) = -\frac{1}{(1+e^{-x})^2}\frac{d}{dx}(1+e^{-x}) = \frac{e^{-x}}{(1+e^{-x})^2}$$
 			Now we add and subtract 1 from the denominator,
 			$$\frac{1}{1 + e^{-x}} \cdot \frac{1 + e^{-x} -1}{1+e^{-x}} = \sigma \left(x\right) \cdot \left(\frac{1 + e^{-x}}{1+e^{-x}} - \frac{1}{1 + e^{-x}} \right) = \fbox{$\sigma(x)\left[1 - \sigma(x)\right]$}$$
 			As desired.
 		\item
 			We assume the data is iid, so the log likelihood, 
-			$$L(\theta) = \sum_{\forall i}\log (y_i | \theta, \bf{x}_i)$$
-			The log of $\sigma (x)$ is $\log(\sigma(x)) =-\log (1 + e^{-x})$
+            \begin{align*}
+                L(\theta) &= \sum_{\forall i}\log (y_i | \theta, \bf{x}_i)\\
+                &= \sum_{\forall i} \log(\sigma(\xx_i)^y_i (1-\sigma(\xx_i))^{1-y_i})\\
+                &= \sum_{\forall i} y_i \log(\sigma(\xx_i)) + (1-y_i)\log(1-\sigma(\xx_i))
+            \end{align*}
+			Now we will take the gradient. We use the fact that $\nabla_\theta \log \sigma(\theta^\T \xx) = \frac{1}{ \sigma( \theta^\T \xx)}\sigma '(\theta^\T  \xx) \xx = (1 - \sigma( \theta^\T \xx))\xx$. So,
+                \begin{align*}
+                    \nabla_\theta L(\theta) &= \nabla_\theta \sum_{\forall i} y_i \log(\sigma(\xx_i)) + (1-y_i)\log(1-\sigma(\xx_i))\\
+                    &= \sum_{\forall i} y_i (1 - \sigma( \theta^\T \xx_i))\xx_i + (1-y_i) \sigma( \theta^\T \xx_i))\xx_i\\
+                    &= \sum_{\forall i} (y_i - \sigma( \theta^\T \xx_i))\xx_i\\
+                    &= X^\T(\yy - \sigma(X\theta)) \text{ Note: we apply $\sigma$ element wise.}
+                \end{align*}
+        \item
+            Now we find the gradient.
+                \begin{align*}
+                    H &= \nabla_\theta (\sum_{\forall i} (y_i - \sigma( \theta^\T \xx_i))\xx_i)^\T\\
+                    &= -(\sum_{\forall i} \nabla_\theta \sigma( \theta^\T \xx_i))\xx_i)^\T\\
+                    &= -\sum_{\forall i} \sigma( \theta^\T \xx_i)(1 -  \sigma( \theta^\T \xx_i))\xx_i\xx_i^\T\\
+                    &= -X^\T S X
+                \end{align*}
+                Where $S = \diag\left[\sigma( \theta^\T \xx_i)(1 -  \sigma( \theta^\T \xx_i))\right]$.
+                 We will show that the negative of the Hessian is positive semi-definite. To do so, we have to show that the eigenvalues of $S$ are positve or zero. But $S$ is diagonal, so the eigenvalues are just the diagonal entries. 
+                 And $\sigma$ is always between zero and one, so
+                  $\sigma( \theta^\T \xx_i)(1 -  \sigma( \theta^\T \xx_i)) \geq 0$, so the negative Hessian is positive semi-definite as desired.
 	\end{enumerate}
 \end{solution}
 
