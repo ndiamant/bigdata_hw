@@ -426,6 +426,9 @@ As desired.
  \frac{62}{35} \\
 \end{array}
 \right)$.
+
+    \item
+
          
 \end{enumerate}
 \newpage
@@ -490,6 +493,36 @@ logistic regression.
 \]
 is in the exponential family and show that the generalized linear model
 corresponding to this distribution is the same as multinomial logistic
-regression.
+regression. NOTE: this is the Multinoulli, not the multinomial.
+
+\vspace{15mm}
+
+We start by taking exp of the log of the product.
+    $$\exp(\prod_{k=1}^K \mu_k^{x_k}) = \exp(\sum_{\forall i} x_i \log(\mu_i))$$
+Because the $\mu$s and $x$s sum to one, it is sufficient to know the first $k-1$ one of them. Thus $x_K = 1 - \sum_{k=1}^{K-1}x_k$ and $mu_K = 1 - \sum_{k=1}^{K-1}\mu_k$.
+\begin{align*}
+    \exp(\sum_{\forall i} x_i \log(\mu_i))&= \exp(\sum_{k=1}^{K-1}x_k \log(\mu_i) + (1 - \sum_{k=1}^{K-1}x_k)\log( 1 - \sum_{k=1}^{K-1}\mu_k)) \\
+    &= \exp(\sum_{k=1}^{K-1}x_k \log(\mu_i) + \log( 1 - \sum_{k=1}^{K-1}\mu_k) - \sum_{k=1}^{K-1}x_k\log( 1 - \sum_{k=1}^{K-1}\mu_k))\\
+    &= \exp(\sum_{k=1}^{K-1}x_k (\log(\mu_i)-\log( 1 - \sum_{k=1}^{K-1}\mu_k)) + \log( 1 - \sum_{k=1}^{K-1}\mu_k))\\
+\end{align*}
+Let $\mu_K = 1 - \sum_{k=1}^{K-1}\mu_k)$. Then we get,
+\begin{align*}
+    \exp(\sum_{k=1}^{K-1}x_k (\log(\mu_i)-\log( 1 - \sum_{k=1}^{K-1}\mu_k)) + \log( 1 - \sum_{k=1}^{K-1}\mu_k)) &=\\ \exp(\sum_{k=1}^{K-1}x_k (\log(\mu_i)-\log(\mu_K)) + \log(\mu_K))\\
+    &= \exp(\sum_{k=1}^{K-1}x_k \log(\frac{\mu_i}{\mu_K})+ \log(\mu_K))\\
+\end{align*}
+Now we go from sums to vectors. Let $\thetab_i = \log(\frac{\mu_i}{\mu_K})$. We also have to rewrite $\log(\mu_K)$ as a function of $\thetab$. To do so, we write $\mu_i$ in terms of $\thetab_i$ and $\mu_K$. 
+   \begin{align*}
+       \thetab_i &= \log(\frac{\mu_i}{\mu_K})\\
+       \mu_i &= \mu_K e^{\thetab_i}\\
+       \mu_K &= 1 - \sum_{k=1}^{K-1} \mu_K e^{\thetab_i} \\
+       \mu_K &= \frac{1}{\sum_{k=1}^{K-1} e^{\thetab_i}} \\
+       \log(\mu_K) &= \log(\frac{1}{\sum_{k=1}^{K-1} e^{\thetab_i}}) \\
+       -A(\thetab) &= -\log(1 + \sum(\thetab)) \\
+   \end{align*}
+So we can rewrite the distribution in exponential family form to get,
+$$\text{Cat}(\xx|\mub) = \exp(\thetab^\T \xx - A(\thetab))$$
+Where $A(\thetab) = \log(1 + \sum(\thetab))$. The expression from Murphy for multiclass logistic regression is,
+        $$p(y=c|\xx,\thetab) = \frac{exp(\thetab_{c}^{\T} \xx)}{\sum_{k=1}^{K-1} exp(\thetab_{c'}^\T \xx)} $$ 
+The bottom term is just $\exp(-A(\thetab))$, so the probability from multiclass logistic regression is the same as the expression for the Multinoulli distribution.
 
 \end{document}
