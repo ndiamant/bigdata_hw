@@ -6,6 +6,8 @@
 \usepackage{enumerate}
 \usepackage{hyperref}
 \usepackage{parskip}
+\usepackage{listings}
+
 \DeclareMathOperator\erf{erf}
 
 \input{./macros.tex}
@@ -132,7 +134,9 @@ features.
             \end{align*}
         Which is our closed form solution for $\xx$.
     \item
-
+        \lstinputlisting[language=Python]{Ridge+Closed+Form.py}
+        \includegraphics[scale = .5]{RMSEvNormconst.png}\\
+        \includegraphics[scale = .5]{wNormVNormconst.png}
     \item
         We will begin by distributing the norm.
         \begin{align*}
@@ -163,8 +167,10 @@ features.
         As we saw in part (d), the gradient with respect to $\xx$ is
             $$ (A^\T A + \Gamma^\T \Gamma)\xx - A^\T (\yy  - b\1)$$
         And the derivative with respect to $b$ is 
-            $$2 \xx^\T A^\T\1 -2\yy^\T\1 +2 b N$$
-        So we will randomly initialize the weights for $\xx$ and $b$ normally with mean $0$ and then subtract the gradient and derivative respectively each step.
+            $$\xx^\T A^\T\1 -\yy^\T\1 +2 b N$$
+        So we will randomly initialize the weights for $\xx$ and $b$ normally with mean $0$ and then subtract the gradient and derivative respectively each step. The code:
+        \lstinputlisting[language=Python]{Ridge+Regression+Gradient+Descent.py}
+        \includegraphics[scale = .8]{graddescent.png}
 
 
 \end{enumerate}
