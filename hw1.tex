@@ -434,7 +434,9 @@ As desired.
 \right)$.
 
     \item
-
+        \lstinputlisting[language=Python]{lin+reg.py}
+        \includegraphics[scale = .5]{linregc.png}\\
+        \includegraphics[scale = .5]{linregd.png}
          
 \end{enumerate}
 \newpage
@@ -531,4 +533,16 @@ Where $A(\thetab) = \log(1 + \sum(\thetab))$. The expression from Murphy for mul
         $$p(y=c|\xx,\thetab) = \frac{exp(\thetab_{c}^{\T} \xx)}{\sum_{k=1}^{K-1} exp(\thetab_{c'}^\T \xx)} $$ 
 The bottom term is just $\exp(-A(\thetab))$, so the probability from multiclass logistic regression is the same as the expression for the Multinoulli distribution.
 
+
+\newpage
+
+
+\textbf{9} Download the Iris dataset from \url{https://vincentarelbundock.github.io/Rdatasets/csv/datasets/iris.csv}
+(you can read about the history behind this dataset at \url{https://en.wikipedia.org/wiki/Iris_flower_data_set}).
+Our goal is to predict the subspecies of the Iris flower given the sepal length and petal
+width using Gaussian Discriminant Analysis (Murphy 4.2). Plot the dataset (with different
+colors for different classes) along with the mean parameters for regular (unlinked/nonlinear)
+Gaussian Discriminant Analysis. Report the accuracy on the entire dataset for running
+$\{$linear discriminant analysis with a bunch of different parameters of the regularization
+parameter $\lambda$, the nonlinear discriminant analysis you plotted above$\}$.
 \end{document}
