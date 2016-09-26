@@ -213,7 +213,20 @@ where \texttt{pix-ij} is the pixel in the \texttt{ith} row and \texttt{jth} colu
         of $\lambda$. Only try 3 values for $k$ ($1,5,$ and $10$) and the $\ell_2$
         norm as your metric. Plot and report the same results as part (b).
 \end{enumerate}
-
+\begin{enumerate}
+     \item
+        The best normalization constant for gradient descent and Newton's method was 0 with accuracy of 0.999527186761.
+        \lstinputlisting[language=Python]{logreg.py}
+        \includegraphics[scale = .5]{logregfinal.png}\\
+    \item
+        Running gradient descent with the full batch size took a really long time, but got 91 percent accuracy. The plot with regularization constants has lower accuracy because I ran it with a smaller batch size and less iterations.   
+        \lstinputlisting[language=Python]{softmax.py}
+        \includegraphics[scale = .5]{p2regconst.png}\\
+    \item
+        The output accuracies for k=1,5,10 respectively: 0.897  0.829 0.783.
+        \lstinputlisting[language=Python]{knn.py}
+\end{enumerate}
+    
 \newpage
 
 \textbf{3} (\textbf{Murphy 2.11} and \textbf{2.16})
@@ -544,5 +557,17 @@ width using Gaussian Discriminant Analysis (Murphy 4.2). Plot the dataset (with 
 colors for different classes) along with the mean parameters for regular (unlinked/nonlinear)
 Gaussian Discriminant Analysis. Report the accuracy on the entire dataset for running
 $\{$linear discriminant analysis with a bunch of different parameters of the regularization
-parameter $\lambda$, the nonlinear discriminant analysis you plotted above$\}$.
+parameter $\lambda$, the nonlinear discriminant analysis you plotted above$\}$. 
+
+\vspace{15mm}
+
+Running gradient descent with the full batch size took a really long time, but got 91 percent accuracy. The plot with regularization constants has lower accuracy because I ran it with a smaller batch size and less iterations.   
+    \lstinputlisting[language=Python]{GDA.py}
+    \includegraphics[scale = .5]{GDAgenlabels.png}\\
+    \includegraphics[scale = .5]{gdaconst.png}\\
+
+
 \end{document}
+
+
+
