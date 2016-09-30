@@ -1,0 +1,29 @@
+\title{\large Bayesian Modeling with Level 2 Quotes to Maximize Sharpe Ratio}
+\author{\large
+        Nathaniel Diamant \\
+            \and
+        Kyle Suver\\
+}
+\date{\today}
+
+\documentclass[12pt]{article}
+
+\begin{document}
+\maketitle
+
+\section{Outline}
+Our goal is to predict short term stock price changes with confidence intervals and then create a portfolio that maximizes the Sharpe Ratio. 
+\\\\
+Level 2 quotes include all of the publically available bid and ask prices with volumes. We will treat this chart of offered price vs. volume as a distribution, giving us a price uncertainty. We will initially use a Gaussian for simplicity, and then a more complicated distribution if necessary/time permits. 
+\\\\
+We will use prices with uncertainties as our training data for the Bayesian model. We will first try Bayesian linear polynomial regression and then move to Gaussian processes for our regression task. We will run the model on multiple stocks, with the output of a mean predicted return rate and a standard deviation of the predicted return rate for each stock.
+\\\\
+Once we have the mean predicted return rate and a standard deviation of the predicted return rate, we will use optimization techniques to allocate money in our portfolio to maximize the Sharpe Ratio, 
+	$$\frac{\mu_p}{\sigma_p}$$
+where $\mu_p$ is the expected return rate of the portfolio in our given time period, and $\sigma_p$ is the standard deviation of the return rate of the portfolio. The goal of optimizing for the Sharpe Ratio is to maximize low risk returns.
+
+\section{Next Steps}
+We have to find historical Level 2 data, which could be difficult because Level 2 quotes are usually licensed. We both have some reading to do on Bayesian Models and Gaussian processes.
+
+\end{document}
+\grid
