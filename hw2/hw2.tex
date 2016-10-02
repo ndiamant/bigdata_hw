@@ -5,6 +5,7 @@
 \usepackage{enumerate}
 \usepackage{hyperref}
 \usepackage{parskip}
+\usepackage{listings}
 
 \input{macros.tex}
 
@@ -55,14 +56,54 @@ Compute
                  p(\xx_1) &= \Nc(\xx_1|\mub_1, \Sigma_{11}) \\
                  &= \Nc \left(\xx_1|\m{0\\0}, \m{6 & 8\\ 8 & 13} \right)
              \end{align*} 
-             Which we can make a 2-d density plot of in numpy.
+             Which we can make a 2-d density plot of in numpy.\\
+             \includegraphics[scale = .5]{p1a.png}
         \item
             Similarly: 
             \begin{align*}
-                p(\x_2) &= \Nc(x_2|\mu_2, \Sigma_2) \\
-                 &= \Nc \left(\x_2|5, \m{14} \right)
+                p(x_2) &= \Nc(x_2|\mu_2, \Sigma_2) \\
+                 &= \Nc \left(x_2|5, 14 \right)
             \end{align*}
-            
+            Which we can make a 2-d density plot of in numpy.\\
+            \includegraphics[scale = .5]{p1b.png}
+        \item
+            The conditional distribution, $p(\xx_1 | x_2)$, is found,
+            $$
+                p(\xx_1 | x_2) = \Nc(\mub_{1|2}, \Sigma_{1|2})\\
+            $$
+            where,
+            \begin{align*}
+                \mub_{1|2} &= \mub_1 + \Sigma_{12} \Sigma_{22}^{-1}(x_2 - \mu_2) \\
+                 &= \m{0\\0} + \m{5\\11} \m{14}^{-1} (x_2 - 5)\\
+                 &= \m{\frac{5}{14}\\\frac{11}{14}}(x_2 - 5)
+            \end{align*}
+            and
+            \begin{align*}
+                \Sigma_{1|2} &= \Sigma_{11} - \Sigma_{12}\Sigma_{22}\Sigma_{21}\\
+                &= \m{6 & 8\\ 8 & 13} - \m{5\\11} \m{14}^{-1} \m{5 & 11}\\
+                &= \m{\frac{59}{14} & \frac{57}{14} \\ \frac{57}{14} & \frac{61}{14} }\\
+            \end{align*}
+            So,
+            $$  p(\xx_1 | \xx_2) = \Nc \left(\xx_1 | \m{\frac{5}{14}\\\frac{11}{14}}(x_2 - 5), \m{\frac{59}{14} & \frac{57}{14} \\ \frac{57}{14} & \frac{61}{14} } \right) $$
+        \item
+            The conditional distribution, $p(x_2 | \xx_1)$, is found,
+            $$
+                p(x_2 | \xx_1) = \Nc(\mu_{2|1}, \Sigma_{2|1})\\
+            $$
+            where,
+            \begin{align*}
+                \mu_{2|1} &= \mu_2 + \Sigma_{21} \Sigma_{11}^{-1}(\xx_1 - \mub_1) \\
+                &= 5 + \m{5 & 11} \m{6 & 8\\ 8 & 13}^{-1} (\xx_1 - \m{0\\0})\\
+                &= 5 + \m{-\frac{23}{14} & \frac{13}{7}}\xx_1
+            \end{align*}
+            and
+            \begin{align*}
+                \Sigma_{2|1} &= \Sigma_{22} - \Sigma_{21}\Sigma_{11}\Sigma_{12}\\
+                &= 14 - \m{5 & 11} \m{6 & 8\\ 8 & 13} \m{5 \\ 11} \\
+                &= \frac{25}{14}              
+            \end{align*}
+            So, 
+            $$ p(x_2 | \xx_1) = \Nc \left( x_2 | 5 + \m{-\frac{23}{14} & \frac{13}{7}}\xx_1, \frac{25}{14} \right) $$
     \end{enumerate}
 \end{solution}
 
@@ -85,6 +126,32 @@ is equivalent to
 using $\ell_1$ regularization (adding a $\lambda\|\xx\|_1$ term to the objective) will give
 sparser solutions than using $\ell_2$ regularization for suitably large $\lambda$.\\[1em]
 
+Our plot in 2 dimensions:\\\\
+\includegraphics[scale = .5]{p2.png}\\
+
+We will begin by constructing the Lagrangian.
+\begin{align*}
+     \text{minimize: } & f(\xx) \\
+     \text{subj. to: } & \|\xx\|_p \leq k \\
+     \text{Is equivalent to}\\    
+     \underset{x}{\min}\underset{\lambda \geq 0}{\max} & f(x) + \lambda(\norm{x}_p - k) \\
+\end{align*}
+Now that we have the Lagrangian, we can construct the dual. 
+\begin{align*}
+    \underset{\lambda \geq 0}{\max} \underset{x}{\min}& f(x) + \lambda(\norm{x}_p - k) \\
+    \underset{\lambda \geq 0}{\max} \underset{x}{\min}& f(x) + \lambda \norm{x}_p - \lambda k \\
+\end{align*}
+Note that $\lambda k$ is a constant under the minimization of $x$, so the problem becomes:
+    $$\underset{\lambda \geq 0}{\max}  \underset{x}{\min} f(x) + \lambda \norm{x}_p$$
+Which, when solving for $x*$, is equivalent to 
+\begin{align*}
+    \text{minimize: } & f(\xx) + \lambda\|\xx\|_p
+\end{align*}
+As desired. The dual is equivalent to the original problem ubder Slater's conditions assuming $f(x)$ is convex, because the contraint is clearly convex and feasible. \\\\
+
+One reason that the L1-norm encourages sparser solutions is that compared to the L2 norm, it punishes terms close to zero much more harshly. We can see this in the dual problem, because as $x$ approaches zero in $\norm{x}_2$, $x**2$ approaches zero much more quickly than the absolute value of $x$.
+
+
 \textbf{3. (Lasso)} Show that placing an equal zero-mean Laplace prior on each element of the weights $\thetab$
 of a model is equivelent to $\ell_1$ regularization in the Maximum-a-Posteriori estimate
 \begin{align*}
@@ -98,6 +165,8 @@ where $\mu$ is the location parameter and $b>0$ controls the variance. Plot the 
 $\mathrm{Lap}(x|0,1)$ and the standard normal $\Nc(x|0,1)$ and suggest why this would
 lead to sparser solutions than a Gaussian prior on each elements of the weights
 (which correspond to $\ell_2$ regularization).\\[1em]
+
+\vspace{10mm}
 
 \textbf{4. (Lasso Feature Selection)} Ignoring undifferentiability at $x=0$, take $\frac{\partial |x|}{\partial x}
 = \mathrm{sign} (x)$. Using this, show that $\nabla \|\xx\|_1 = \mathrm{sign}(\xx)$ where $\mathrm{sign}$ is applied
@@ -137,6 +206,15 @@ and a randomly shuffled version of the same image (all on the same plot). In a s
 a grid of four images: the original image, and a rank $k$ truncated SVD approximation of the original
 image for $k\in\{2,10,20\}$.\\[1em]
 
+The code:
+\lstinputlisting[language=Python]{SVD.py}
+The compressed images:\\\\
+\includegraphics[scale = .5]{p5comp.png}\\\\
+The singular values. Note that the original image has many more high singular values, which means it can be compressed effectively using those values. This is a product of the fact that the original image has structure, while the random image does not.\\\\
+\includegraphics[scale = .5]{p5rand.png}\\\\
+
+
+
 \textbf{6. (Murphy 12.5 - Deriving the Residual Error for PCA)} It may be helpful to reference
 section 12.2.2 of Murphy.
 \begin{enumerate}[(a)]
@@ -160,5 +238,4 @@ section 12.2.2 of Murphy.
         \]
         Hint: partition the sum $\sum_{j=1}^d \lambda_j$ into $\sum_{j=1}^k \lambda_j$ and $\sum_{j=k+1}^d \lambda_j$.
 \end{enumerate}
-
 \end{document}
