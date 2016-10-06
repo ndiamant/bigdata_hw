@@ -107,6 +107,8 @@ Compute
     \end{enumerate}
 \end{solution}
 
+\newpage
+
 \textbf{2. ($\ell_1$-Regularization)} Consider the $\ell_1$ norm of a vector $\xx\in\RR^n$:
 \[
     \|\xx\|_1 = \sum_i |\xx_i|.
@@ -149,8 +151,11 @@ Which, when solving for $x*$, is equivalent to
 \end{align*}
 As desired. The dual is equivalent to the original problem ubder Slater's conditions assuming $f(x)$ is convex, because the contraint is clearly convex and feasible. \\\\
 
-One reason that the L1-norm encourages sparser solutions is that compared to the L2 norm, it punishes terms close to zero much more harshly. We can see this in the dual problem, because as $x$ approaches zero in $\norm{x}_2$, $x**2$ approaches zero much more quickly than the absolute value of $x$.
+One reason that the L1-norm encourages sparser solutions is that compared to the L2 norm, it punishes terms close to zero much more harshly. We can see this in the dual problem, because as $x$ approaches zero in $\norm{x}_2$, $x^2$ approaches zero much more quickly than the absolute value of $x$.\\\
 
+Another reason is that the L1-norm is the smallest convex set around the L0-norm, which looks like a plus sign and represents the problem of selecting the best features to represent your data. In other words, the L1-norm is a convex approximation (the convex hull) of trying to find a sparse representation of your data.
+
+\newpage
 
 \textbf{3. (Lasso)} Show that placing an equal zero-mean Laplace prior on each element of the weights $\thetab$
 of a model is equivelent to $\ell_1$ regularization in the Maximum-a-Posteriori estimate
@@ -167,6 +172,21 @@ lead to sparser solutions than a Gaussian prior on each elements of the weights
 (which correspond to $\ell_2$ regularization).\\[1em]
 
 \vspace{10mm}
+
+We know that maximizing the log is equivalent to maximization, so we take the log.
+\begin{align*}
+    \underset{\theta}{\text{max }} & \PP(\thetab | \Dc) = \frac{\PP(\Dc | \thetab)\PP(\thetab)}{\PP(\Dc)}\\
+    \underset{\theta}{\text{max }} & \log \frac{\PP(\Dc | \thetab)\PP(\thetab)}{\PP(\Dc)} \\
+    \underset{\theta}{\text{max }} & \log \PP(\Dc | \thetab) + \log\PP(\thetab) -\log \PP(\Dc)
+\end{align*}
+$\log \PP(\Dc)$ is a constant w.r.t. $\theta$, so we can ignore it in maximization. Now we plug in the definition of log likilihood with a zero mean Laplacian prior for $\log\PP(\thetab)$.
+\begin{align*}
+    \underset{\theta}{\text{max }} & \log \PP(\Dc | \thetab) + \sum_{\forall \thetab} \log \frac{1}{2b}\exp \left(-\frac{|\thetab|}{b} \right)\\
+    \underset{\theta}{\text{max }} & \log \PP(\Dc | \thetab) + \sum_{\forall \thetab}\left[\log \frac{1}{2b} \right]- \frac{1}{b}\sum_{\forall \thetab}|\thetab|\\
+\end{align*}
+Now we again ignore the constant, and use the fact that maximizing is the same as minimizing the negative. We also note that the definition of the L1-norm is $\sum_{\forall \thetab}|\thetab|$ Then we get
+    $$ \underset{\theta}{\text{min }} \frac{1}{b} \norm{\thetab}_1 - \log \PP(\Dc | \thetab)$$
+If we let $\lambda = \frac{1}{b}$, then we get the maximum likelihood with L1-regularization as desired. 
 
 \textbf{4. (Lasso Feature Selection)} Ignoring undifferentiability at $x=0$, take $\frac{\partial |x|}{\partial x}
 = \mathrm{sign} (x)$. Using this, show that $\nabla \|\xx\|_1 = \mathrm{sign}(\xx)$ where $\mathrm{sign}$ is applied
@@ -200,6 +220,12 @@ so that each iterate
 where $\gamma$ is your learning rate. Tip: you can reuse most of your code from the
 first homework.\\[1em]
 
+\begin{solution}
+    
+\end{solution}
+
+\newpage
+
 \textbf{5. (SVD Image Compression)} Load the image of a scary clown at \url{http://i.imgur.com/X017qGH.jpg}
 into a matrix/array. Plot the progression of the 100 largest singular values for the original image
 and a randomly shuffled version of the same image (all on the same plot). In a single figure plot
@@ -210,9 +236,11 @@ The code:
 \lstinputlisting[language=Python]{SVD.py}
 The compressed images:\\\\
 \includegraphics[scale = .5]{p5comp.png}\\\\
-The singular values. Note that the original image has many more high singular values, which means it can be compressed effectively using those values. This is a product of the fact that the original image has structure, while the random image does not.\\\\
+The singular value plot is below. Note that the original image has many more high singular values, which means it can be compressed effectively using those values. This is a product of the fact that the original image has structure, while the random image does not.\\\\
 \includegraphics[scale = .5]{p5rand.png}\\\\
 
+
+\newpage
 
 
 \textbf{6. (Murphy 12.5 - Deriving the Residual Error for PCA)} It may be helpful to reference
@@ -238,4 +266,41 @@ section 12.2.2 of Murphy.
         \]
         Hint: partition the sum $\sum_{j=1}^d \lambda_j$ into $\sum_{j=1}^k \lambda_j$ and $\sum_{j=k+1}^d \lambda_j$.
 \end{enumerate}
+
+
+\begin{solution}
+    \begin{enumerate}[(a)]
+        \item
+            We begin by expanding the norm. (Note I switch around the definition of $z$ to its transpose often because it is a scalar).
+            \begin{align*}
+                &= \norm{\xx_i - \sum_{j=1}^k z_{ij}\vv_j}\\
+                &= \left(\xx_i - \sum_{j=1}^k z_{ij}\vv_j \right)^\T \left(\xx_i - \sum_{j=1}^k z_{ij}\vv_j \right)\\
+                &= \xx_i^\T \xx_i -\xx_i^\T \sum_{j=1}^k z_{ij}\vv_j - \left( \sum_{j=1}^k z_{ij}\vv_j \right)^\T \xx_i + \left( \sum_{j=1}^k z_{ij}\vv_j \right)^\T \sum_{j=1}^k z_{ij}\vv_j\\
+                &= \xx_i^\T \xx_i - 2 \left( \sum_{j=1}^k z_{ij}\vv_j \right)^\T \xx_i + \left( \sum_{j=1}^k z_{ij}\vv_j \right)^\T \sum_{j=1}^k z_{ij}\vv_j \text{ Using scalar transpose = scalar}\\     
+                &= \xx_i^\T \xx_i - 2 \sum_{j=1}^k \vv_j^\T z_{ij} \xx_i + \sum_{j=1}^k z_{ij} \vv_j^\T  \sum_{j=1}^k \vv_j z_{ij} \text{ Using scalar transpose = scalar}\\
+                &= \xx_i^\T \xx_i - 2 \sum_{j=1}^k \vv_j^\T \xx_i \xx_i \vv_j^\T+ \sum_{j=1}^k z_{ij} \vv_j^\T  \sum_{j=1}^k \vv_j z_{ij} \text{ expand $z_{ij}$ }\\
+                &= \xx_i^\T \xx_i - 2 \sum_{j=1}^k \vv_j^\T \xx_i \xx_i \vv_j^\T+ \sum_{j=1}^k z_{ij} \vv_j^\T  \sum_{j=1}^k \vv_j z_{ij} \text{ expanding $z_{ij}$ }\\
+                &= \xx_i^\T \xx_i - 2 \sum_{j=1}^k \vv_j^\T \xx_i \xx_i \vv_j^\T+ \sum_{j=1}^k z_{ij} \vv_j^\T  \sum_{j=1}^k \vv_j z_{ij} \text{ expanding $z_{ij}$ }\\
+                &= \xx_i^\T \xx_i - 2 \sum_{j=1}^k \vv_j^\T \xx_i \xx_i \vv_j^\T+ \sum_{j=1}^k z_{ij} \vv_j^\T \vv_j z_{ij} \text{ Only non-zero when the subscripts are equal }\\
+                &= \xx_i^\T \xx_i - 2 \sum_{j=1}^k \vv_j^\T \xx_i \xx_i \vv_j^\T+ \sum_{j=1}^k z_{ij} z_{ij} \text{ Because $\vv_j^\T \vv_j = 1$ }\\
+                &= \xx_i^\T \xx_i - 2 \sum_{j=1}^k \vv_j^\T \xx_i \xx_i \vv_j^\T+ \sum_{j=1}^k \vv_j^\T \xx_i \xx_i \vv_j^\T \text{ Definition of $z_{ij}$ }\\
+                &= \xx_i^\T\xx_i - \sum_{i=1}^k\vv_j^\T \xx_i\xx_i^\T \vv_j \text{ As long sought after}
+            \end{align*}
+        \item
+            \begin{align*}
+                J_k &= \frac{1}{n}\sum_{i=1}^n \left(\xx_i^\T \xx_i - \sum_{i=1}^k\vv_j^\T \xx_i\xx_i^\T \vv_j\right)\\
+                &= \frac{1}{n}\sum_{i=1}^n \xx_i^\T \xx_i - \frac{1}{n}\sum_{i=1}^n \sum_{i=1}^k\vv_j^\T \xx_i\xx_i^\T \vv_j\\
+                &= \frac{1}{n}\sum_{i=1}^n \xx_i^\T \xx_i - \sum_{i=1}^n \vv_j^\T \Sigmab \vv_j \text{ Using $\sum_{i=1}^k \xx_i\xx_i^\T = n\Sigmab$ }\\
+                &= \frac{1}{n}\sum_{i=1}^n \xx_i^\T\xx_i - \sum_{j=1}^k\lambda_j \text{ As desired}
+            \end{align*}           
+        \item
+        We begin from part b) instead with $J_d = \frac{1}{n}\sum_{i=1}^n \xx_i^\T\xx_i - \sum_{j=1}^d\lambda_j = 0$, which means $\sum_{j=1}^d\lambda_j = \frac{1}{n}\sum_{i=1}^n$. This means,
+        \begin{align*}
+            J_k  &= \frac{1}{n}\sum_{i=1}^n \xx_i^\T\xx_i - \sum_{j=1}^k\lambda_j\\
+            &= \sum_{j=1}^d\lambda_j - \sum_{j=1}^k\lambda_j \\
+            &= \sum_{j=k+1}^d\lambda_j \text{ As desired.}
+        \end{align*}
+            
+    \end{enumerate}
+\end{solution}
 \end{document}
