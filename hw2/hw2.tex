@@ -65,7 +65,7 @@ Compute
                  &= \Nc \left(x_2|5, 14 \right)
             \end{align*}
             Which we can make a 2-d density plot of in numpy.\\
-            \includegraphics[scale = .5]{p1b.png}
+            \ graphics[scale = .5]{p1b.png}
         \item
             The conditional distribution, $p(\xx_1 | x_2)$, is found,
             $$
@@ -215,12 +215,44 @@ the gradient descent step with a threshold function
 \]
 so that each iterate
 \[
-    \xx_{i+1} = \mathrm{prox}_{\gamma}\left( \xx_i - \gamma \nabla f(\xx_i) \right)
+    \xx_{i+1} = \mathrm{prox}_{\lambda\gamma}\left( \xx_i - \gamma \nabla f(\xx_i) \right)
 \]
 where $\gamma$ is your learning rate. Tip: you can reuse most of your code from the
 first homework.\\[1em]
 
 \begin{solution}
+    To show $\nabla \|\xx\|_1 = \mathrm{sign}(\xx)$, we use the definition of the L1-norm. This yields,
+    \begin{align*}
+        \nabla \|\xx\|_1 &= \nabla \sum_{i=0}^N |x_i|\\
+        &= \m{\frac{\partial |x_0|}{\partial x_0}\\\vdots\\\frac{\partial|x_N|}{\partial x_N}}\\
+        &= \mathrm{sign}(\xx) \text{ By problem supposition.}
+    \end{align*}
+    With this result, we can find the gradient of the $\ell_1$ regularized linear regression objective. 
+    \begin{align*}
+        &= \nabla_{\xx} \|A\xx - \bb\|_2^2 + \lambda \|\xx\|_1 & \text{Def. of gradient}\\
+        &= \nabla_{\xx} [\xx^\T A^\T A \xx - \xx^\T A^\T \bb - \bb^\T A \xx + \lambda \sum_{i=0}^N |x_i| ]   & \text{Def. of norms}\\
+        &= 2 A^\T A \xx - 2 \bb^\T A + \lambda \mathrm{sign}(\xx) & \\
+    \end{align*}
+
+    After implementing gradient descent, the features weighted with the heighest magnitude from most to least were:
+    \begin{itemize}
+        \item 
+        kw\_min\_max 
+        \item 
+        kw\_max\_max 
+        \item 
+        self\_reference\_min\_shares 
+        \item 
+        abs\_title\_sentiment\_polarity 
+        \item 
+        self\_reference\_max\_shares 
+    \end{itemize}
+    Here is the plot of the objective vs. iterations. Note I initialized from random weights, so initially the objective falls quickly, then oscillates around the optimum. \\
+    \includegraphics[scale = .5]{objectiveViterations2.png} \\
+    Here is the regularization path plot. \\
+    \includegraphics[scale = .5]{regpath.png} \\
+    And here is the code: \\
+    \lstinputlisting[language=Python]{Lasso+Feature+Selection.py}
     
 \end{solution}
 
