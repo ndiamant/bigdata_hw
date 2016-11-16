@@ -1,0 +1,175 @@
+\documentclass[12pt,letterpaper,fleqn]{hmcpset}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{enumerate}
+\usepackage{hyperref}
+\usepackage{parskip}
+\usepackage{listings}
+
+\input{./macros.tex}
+
+% info for header block in upper right hand corner
+\name{Nate Diamant}
+\class{Math 189r}
+\assignment{Homework 4}
+\duedate{November 21, 2016}
+
+\begin{document}
+
+There are 5 problems in this set. You need to do 3 problems the first week and 2 the second
+week. Instead of a sixth problem, \textbf{you are encouraged to work on your final project}.
+Feel free to work with other students, but make sure you write up the homework
+and code on your own (no copying homework \textit{or} code; no pair programming).
+Feel free to ask students or instructors for help debugging code or whatever else,
+though.
+When implementing algorithms you may not use any library (such as \texttt{sklearn})
+that already implements the algorithms but you may use any other library for
+data cleaning and numeric purposes (\texttt{numpy} or \texttt{pandas}). Use common
+sense. Problems are in no specific order.\\[1em]
+
+\textbf{1 (Gaussian Mixture Model)} Consider the generative process for a Gaussian
+Mixture Model:
+\begin{enumerate}[(1)]
+    \item Draw $z_i \sim \mathrm{Cat}(\pib)$ for $i=1,2,\dots,n$.
+    \item Draw $\xx_i \sim \Nc(\mub_{z_i}, \Sigmab_{z_i})$ for $i=1,2,\dots,n$.
+\end{enumerate}
+Note that $z_i$ is unobserved but $\xx_i$ is observed.
+Express this model as a directed graphical model, first `unrolled' and then using
+Plate notation, before answering the following questions. Support all claims.
+\begin{enumerate}[(a)]
+    \item Is $\pib$ independent of $\mub_{z_i}$ or $\Sigmab_{z_i}$ given
+        your dataset $\Dc = \{\xx_i\}$? Does the posterior distribution over
+        $\{\mub,\Sigmab\}$ and $\pib$ factorize? How does this change what inference
+        procedure we need to use for this model?
+    \item If $z_i$ were observed, would this change? Would the posterior then
+        factorize? \textit{Hint:} what other model have we studied that corresponds to
+        observing $z_i$?
+    \item Find the maximum likelihood estimates for $\pib$, $\mub_k$, and $\Sigmab_k$
+        \textit{if} the latent variables $z_i$ were observed.\\
+
+\begin{solution}
+
+    \includegraphics[scale = .5]{p1.png}
+    \begin{enumerate}[(a)]
+        \item 
+            Looking at our DGM, $\pib$ and $\mub_{z_i}$ and $\Sigmab_{z_i}$ are mutually dependent given the data using the Bayes ball algorithm (example c) Murphy 325). The posterior does not factorize, hence the need for the EM algorithm in mixture models.
+        \item 
+            When $z_i$ are observed, the model becomes Gaussian Discriminant Analysis. The shaded $z_i$ stop the balls from establishing dependence (example a) Murphy 325) The posterior of GDA does factorize, hence the closed form solutions for the variations of GDA.
+        \item
+            Because $z_i$ are observed, the MLE for $\pib$ is $\pib_k = \frac{1}{n}\sum_i I(z_i = k)$. Similarly, $\mub_{z_i}$ and $\Sigmab_{z_i}$ are just the empirical mean and covariances respectively of their clusters.
+
+    \end{enumerate}
+\end{solution}
+\end{enumerate}
+\newpage
+
+\textbf{2 (Linear Regression)} Consider the Bayesian Linear Regression model with
+the following generative process:
+\begin{enumerate}[(1)]
+    \item Draw $\ww \sim \Nc(\0, \mathbf{V}_0)$
+    \item Draw $\yy_i \sim \Nc(\ww^\T\xx_i, \sigma^2)$ for $i=1,2,\dots,n$ where $\sigma^2$
+        is known.
+\end{enumerate}
+Express this model as a directed graphical model using Plate notation. Is $\yy_i$
+independent of $\ww$? Is $\yy_i$ independent of $\ww$ \textit{given} $\Dc = \{\xx_i\}$? Support
+these claims.
+\begin{solution}
+    \includegraphics[scale = .5]{p2.png}\\\\
+    $\yy_i$ can never be independent of $\ww$ because it is directly formulaicly derived directly from $\ww$.
+\end{solution}
+
+\newpage
+
+\textbf{3 (Collaborative Filtering)} Consider the `ratings' matrix $\Rb\in\RR^{n\times n}$
+with the low rank approximation $\Rb = \Ub \Vb^\T$ where $\Ub$ and $\Vb$ live in
+$\RR^{n\times k}$ where we have $k$ latent factors. Define our optimization problem as
+\begin{align*}
+    \text{minimize: } & f(\Ub,\Vb) = \|\Rb - \Ub\Vb^\T\|_2^2 + \lambda\|\Ub\|_2^2 + \gamma\|\Vb\|_2^2
+\end{align*}
+where $\|\cdot\|_2$ in this case is the Frobenius norm $\|\Rb\|_2^2 = \sum_{ij}\Rb_{ij}^2$.
+Derive the gradient of $f$ with respect to $\Ub_i$ and $\Vb_j$. Derive a stochastic
+approximation to this gradient where you consider a single data point at a time.\\
+
+\begin{solution}
+    First we will take the gradient with respect to $\Ub_k$.
+    \begin{align*}
+        0 &= \nabla_{\Ub_k} \|\Rb - \Ub\Vb^\T\|_2^2 + \lambda\|\Ub\|_2^2 + \gamma\|\Vb\|_2^2\\
+        &= \nabla_{\Ub_k} \sum_{ij}(\Rb_{ij} + (\Ub \Vb^\T)_{ij} )^2 - \lambda \sum_{ij} \Ub_{ij}^2 \\
+        &= \nabla_{\Ub_k} \sum_{ij}(\Rb_{ij} - \Ub_i \Vb^\T_j )^2 + \lambda \sum_{i} \Ub_i \Ub_i^\T \\
+        &=  -2 \sum_{i}(\Rb_{ik} - \Ub_i \Vb^\T_k) \Vb_k - 2\lambda \Ub_{k}
+    \end{align*}
+    Using the similarity of the problem, 
+    $$
+        \nabla_{\Vb_k} f(\Ub,\Vb) = -2 \sum_{j}(\Rb_{ik} - \Ub_k \Vb^\T_j) \Ub_k - 2\lambda \Vb_{k}
+    $$
+    Our stochastic method will only use one data point at a time, so we will drop the sums, yielding,
+    \begin{align*}
+        & -2 (\Rb_{ik} - \Ub_i \Vb^\T_k) \Vb_k - 2\lambda \Ub_{k} \\
+        &  -2 (\Rb_{ik} - \Ub_k \Vb^\T_j) \Ub_k - 2\lambda \Vb_{k}
+    \end{align*}
+\end{solution}
+
+\newpage
+
+\textbf{4 (Alternating Least Squares)} Consider the same setup and objective
+\begin{align*}
+    \text{minimize: } & f(\Ub,\Vb) = \|\Rb - \Ub\Vb^\T\|_2^2 + \lambda\|\Ub\|_2^2 + \gamma\|\Vb\|_2^2
+\end{align*}
+as above in problem (3).
+\begin{enumerate}[(a)]
+    \item Suppose we fix $\Ub$. Find the optimal $\Vb$.
+    \item Suppose we fix $\Vb$. Find the optimal $\Ub$.
+    \item Propose an EM-like (block coordinate ascent, to be exact) like algorithm
+        for minimizing $f(\Ub,\Vb)$ using (a) and (b).
+    \item Will the algorithm you propose in (c) necessarily converge to the global
+        optimal?
+\end{enumerate}
+
+\begin{solution}
+    \begin{enumerate}[(a)]
+        \item
+            We take the partial with respect to the entire matrix and set it to zero. 
+            \begin{align*}
+                0 &= \frac{\partial}{\partial \Vb^\T} \|\Rb - \Ub\Vb^\T\|_2^2 + \lambda\|\Ub\|_2^2 + \gamma\|\Vb\|_2^2 \\
+                &= \frac{\partial}{\partial \Vb^\T} \|\Rb - \Ub \Vb^\T  \|_2^2 + \lambda\|\Ub\|_2^2 + \gamma\|\Vb^\T \|_2^2 \text{ Transpose of scalar} \\
+                &= -2\Ub^\T(\Rb - \Ub\Vb^\T) + 2\gamma \Vb^\T \text{ Matrix Cookbook partial of Frobenius norm} \\
+                \Ub^\T \Rb &= (\gamma \Ib  + \Ub^\T \Ub) \Vb^\T  \\
+                \Vb^\T &= (\gamma \Ib  + \Ub^\T \Ub)^{-1} \Ub^\T \Rb
+            \end{align*}
+        \item
+            Similarly,
+            \begin{align*}
+                0 &= \frac{\partial}{\partial \Ub} \|\Rb - \Ub\Vb^\T\|_2^2 + \lambda\|\Ub\|_2^2 + \gamma\|\Vb\|_2^2 \\
+                &= -2 (\Rb - \Ub\Vb^\T) \Vb + 2 \lambda \Ub \\
+                \Rb \Vb &= \Ub (\Vb^\T \Vb + \lambda \Ib) \\
+                \Ub &= \Rb \Vb(\Vb^\T \Vb + \lambda \Ib)^{-1}
+            \end{align*}
+        \item
+            My algorithm starts with some guessed $\Ub$. Using that, it then calculates the optimal $\Vb^\T$ using the closed form above. With that $\Vb^\T$, calculate the optimal $\Ub$. Repeat until the cost function is less than some specified precision.
+        \item
+            Consider the single variate case:
+            $$
+                (R-UV)^2 + \lambda U^2 + \gamma V^2\\       
+            $$
+            The Hessian with $R, V$ as variables is (Mathematica):
+            $$\left(
+                \begin{array}{cc}
+                 2 V^2+2 \lambda  & 2 U V-2 (R-U V) \\
+                 2 U V-2 (R-U V) & 2 U^2+2 \gamma  \\
+                \end{array}
+            \right)$$
+            which is not necessarily positive definite.
+
+
+    \end{enumerate}
+\end{solution}
+
+\textbf{5 (Non-Negative Matrix Factorization)} Consider the dataset at
+\url{http://kdd.ics.uci.edu/databases/reuters21578/reuters21578.html}. Choosing an appropriate
+objective function and algorithm from Lee and Seung 2001\footnote{\url{https://papers.nips.cc/paper/1861-algorithms-for-non-negative-matrix-factorization.pdf}}
+implement Non-Negative Matrix Factorization for topic modelling (choose an appropriate number
+of topics/latent features) and assert that the convergence properties proved in the paper hold. 
+Display the 20 most relevant words for each of the topics you discover.
+
+\end{document}

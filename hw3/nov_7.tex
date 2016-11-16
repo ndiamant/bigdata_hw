@@ -5,6 +5,7 @@
 \usepackage{enumerate}
 \usepackage{hyperref}
 \usepackage{parskip}
+\usepackage{listings}
 
 \input{./macros.tex}
 
@@ -102,6 +103,8 @@ Now we add a $\log p(\mu_k) = \sum_i \log \beta(\alpha, \beta)^{-1} \mu_{kj}^{\a
 \end{align*}
 Note: the math almost worked out. Not quite sure why $\alpha, \beta, -2$ are not in the sum.
 
+\newpage
+
 \textbf{3 (MAP Mixture of Gaussians)} Consider a mixture of Gaussians with a Dirichlet prior on the
 mixture weights $\pib \sim \mathrm{Dir}(\alphab)$ and a Negative Inverse Walshart prior on the
 mean and covariance within each class
@@ -116,6 +119,14 @@ with the EM algorithm. Do the clusters roughly correspond to the color of the wi
 numbers)? Provide a convergence plot of the MAP objective. If it doesn't monotonically increase there is a bug
 in your code or math.
 
+\vspace{15mm}
+My measure of success was the f1-score. I got an f1-score of $0.86$ using sklearn's metrics library. Here is the objective plot.
+
+\includegraphics[scale = .5]{p3_objective.png}\\\\
+\lstinputlisting[language=Python]{GaussianEM.py}
+
+\newpage
+
 \textbf{4 (MAP Mixture of Bernoullis)} Consider a mixture of Bernoullis with a Dirichlet prior on the mixture
 weights $\pib \sim \mathrm{Dir}(\alphab)$ and a Beta prior on the mean parameter $\mu_{kj} \sim \beta(\alpha,\beta)$.
 Use $\alphab=\1$ and choose an appropriate $(\alpha,\beta)$ pair for your prior (back this up).
@@ -124,6 +135,14 @@ from homework 1 (\url{http://pjreddie.com/media/files/mnist_train.csv}) using th
 Provide a convergence plot of the MAP objective
 (which must monotonically increase) and plot the mean images for each component. Do the clusters roughly correspond to
 different digits (back this up somehow)?
+
+I ran into numeric problems I think, which I believe causes the slight dip in the objective function. The means also got tied together by my attempt at a numeric fix, hence the poor digit representation. The plot of the means shows that the clusters do not correspond well to the digits =(. I selected $\alpha = \beta = 1$ giving a uniform prior.
+
+\includegraphics[scale = .5]{p4_objective_1.png}\\\\
+\includegraphics[scale = .25]{p4means.png}\\\\
+\lstinputlisting[language=Python]{BernouliMAPwithEM.py}
+
+\newpage
 
 \textbf{5 (Operations Preserving Kernels)} Let $\kappa(\cdot,\cdot)$ and $\lambda(\cdot,\cdot)$ be valid positive
 semi-definite (Mercer) kernels mapping from a sample space $\mathcal{S}$ to $\RR$. Let $\alpha \geq 0$ be a real number
