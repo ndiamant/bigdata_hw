@@ -6,6 +6,7 @@
 \usepackage{hyperref}
 \usepackage{parskip}
 \usepackage{listings}
+\usepackage{verbatim}
 
 \input{./macros.tex}
 
@@ -159,17 +160,47 @@ as above in problem (3).
                  2 U V-2 (R-U V) & 2 U^2+2 \gamma  \\
                 \end{array}
             \right)$$
-            which is not necessarily positive definite.
+            which is not necessarily positive definite, so convergence is not guaranteed.
 
 
     \end{enumerate}
 \end{solution}
 
+\newpage
+
 \textbf{5 (Non-Negative Matrix Factorization)} Consider the dataset at
 \url{http://kdd.ics.uci.edu/databases/reuters21578/reuters21578.html}. Choosing an appropriate
-objective function and algorithm from Lee and Seung 2001\footnote{\url{https://papers.nips.cc/paper/1861-algorithms-for-non-negative-matrix-factorization.pdf}}
+objective function and algorithm from Lee and Seung 2001
 implement Non-Negative Matrix Factorization for topic modelling (choose an appropriate number
 of topics/latent features) and assert that the convergence properties proved in the paper hold. 
 Display the 20 most relevant words for each of the topics you discover.
+
+I used Frobenius norm. minimization for simplicity of implementation.
+Here is my convergence plot:\\\\
+\includegraphics[scale = .5]{obj.png}\\\\
+Note that it does not demonstrate monotonicity. I cannot find the bug even in my simple code that matches the paper's update rule exactly even in notation (as far as I can tell). I think I might be having numerical problems, but I have no idea why. This problem also means that the top words in each topic are not coherent =(. Here are the words:
+\begin{verbatim}
+ ['net' 'dlrs' 'loss' '000' 'vs']
+ ['said' 'cts' 'in' 'the' 'of']
+ ['dlrs' 'loss' 'vs' '000' 'net']
+ ['lt' 'mln' 'net' 'vs' 'cts']
+ ['said' 'in' 'to' 'mln' 'and']
+ ['in' 'the' 'said' 'of' 'to']
+ ['and' 'year' 'the' 'to' 'in']
+ ['mln' 'from' 'in' 'to' 'the']
+ ['on' 'in' 'the' 'of' 'said']
+ ['pct' 'in' 'to' 'and' 'mln']
+ ['to' 'its' 'dlrs' 'the' 'for']
+ ['in' 'for' 'said' 'of' 'it']
+ ['of' 'vs' 'mln' 'profit' '000']
+ ['of' 'dlrs' 'cts' 'net' 'shr']
+ ['shr' 'qtr' 'vs' 'mln' 'cts']
+ ['shr' 'to' 'vs' 'in' 'billion']
+ ['revs' 'loss' 'net' 'mln' '000']
+ ['revs' 'vs' 'net' 'mln' 'loss']
+ ['and' 'vs' 'the' 'of' '000']
+ ['shr' 'mln' 'vs' 'cts' 'the']]  
+\end{verbatim}
+\lstinputlisting[language=Python]{matrix_factorization.py}
 
 \end{document}
