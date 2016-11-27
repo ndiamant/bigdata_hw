@@ -1,3 +1,4 @@
+function test
 
 % Our code %
 x = gpml_randn(0.8, 20, 1);                 % 20 training inputs
@@ -22,3 +23,35 @@ f = [mu+2*sqrt(s2); flipdim(mu-2*sqrt(s2),1)];
   fill([xs; flipdim(xs,1)], f, [7 7 7]/8)
   hold on; plot(xs, mu); plot(x, y, '+')
 
+%{
+cor_sharpe('/home/nate/Courses/bigdata/bigdata_hw/final_project/stock_data', get_sharpe)
+
+
+function [sharpe_ratios, cor] = cor_sharpe(dirname, sharpe_func)
+    dirname = strcat(dirname, '*.csv');
+    files = dir(dirname);
+    len = length(files);
+    cor = zeros(len, len);
+    sharpe_ratios = zeros(len);
+    for i = 1:len
+        stock_i = read_file(files(i).name);
+        sharpe_ratios(i) = sharpe_func(stock_i);
+        for j = 1:len
+            stock_j = read_file(files(j).name);
+            cor(i,j) = corrcoeff(stock_i, stock_j);
+        end
+    end     
+end
+
+
+function sr = get_sharpe(stock)
+    sr = 0;
+end
+
+function vec = read_file(file_name)
+    vec = [1. 2. 3.]
+end
+
+end
+%}
+end
