@@ -5,6 +5,7 @@
 \usepackage{enumerate}
 \usepackage{hyperref}
 \usepackage{parskip}
+\usepackage{listings}
 
 \input{macros.tex}
 
@@ -68,6 +69,17 @@ function $E(\ww) = -\log\PP(\Dc|\ww) - \log\PP(\ww)$,
 Bayesian Logistic Regression from Problem 1. Calculate the posterior distribution
 over $\ww$.
 
+\begin{solution}
+	A density plot of the posterior distribution over $\ww$.\\\\
+	\begin{center}
+		\includegraphics[scale = .5]{posterior.png}
+	\end{center}
+	
+	Here is the code:
+	\lstinputlisting[language=Python]{logistic_posterior.py}
+
+\end{solution}
+
 \newpage
 
 \textbf{3 (Monte-Carlo Predictive Posterior)} From Problem 2 we have the distribution
@@ -118,6 +130,10 @@ a Gaussian, so we can sample from it easily.
 				&\propto \frac{1}{S^2} \text{ Because $\EE$ is linear operator.}
 			\end{align*}
 			Which is proportional to $\frac1S$ once we multiply by $S$.
+
+		\item
+			From the code in problem 2:\\\\
+			\includegraphics[scale = 1]{pred.png}
 	\end{enumerate}
 \end{solution}
 
