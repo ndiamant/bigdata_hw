@@ -41,16 +41,21 @@ function $E(\ww) = -\log\PP(\Dc|\ww) - \log\PP(\ww)$,
         \item
             \begin{align*}
                  \nabla_\ww E &= \nabla_\ww (-\log\PP(\Dc|\ww) - \log\PP(\ww)) \\
-                 &=  X(\mub-\yy) - \nabla_\ww\log \frac{1}{\sqrt{(2\pi)^k|\Vb_0|}} \exp \left[-\frac12 \ww^\T \Vb_0^{-1} \ww \right]\\ &\text{Using prev. derivation of MLE. $\mub = \sigma(\ww^\T X)$}\\
-                 \gg &= X(\mub-\yy) +  \frac{\Vb_0^{-1} \ww}{\sqrt{(2\pi)^k|\Vb_0|}} \exp \left[-\frac12 \ww^\T \Vb_0^{-1} \ww \right]\\
+                 &=  X^\T(\mub-\yy) - \nabla_\ww\log \frac{1}{\sqrt{(2\pi)^k|\Vb_0|}} \exp \left[-\frac12 \ww^\T \Vb_0^{-1} \ww \right]\\ &\text{Using prev. derivation of MLE. $\mub = \sigma(\ww^\T X)$}\\
+                 \gg &= X^\T(\mub-\yy) - \Vb_0^{-1} \ww \text{ (Matrix Cookbook)}\\
              \end{align*} 
         \item
            \begin{align*}
-                H &= \frac\partial{\partial \ww} \gg(\ww)^\T \\
-                &=  X^\T S X + \frac\partial{\partial \ww} \frac{ \ww^\T \Vb_0^{-1\T} }{\sqrt{(2\pi)^k|\Vb_0|}} \exp \left[-\frac12 \ww^\T \Vb_0^{-1} \ww \right]\\
-                & \text{ Where $S = \diag(\mu_i(1-\mu_i))$} \\
-                &= X^\T S X 
-            \end{align*} 
+                &= \frac\partial{\partial \ww} \gg(\ww)^\T \\
+                H &=  X^\T S X - \Vb_0^{-1} \\
+                & \text{ Where $S = \diag(\mub_i(1-\mub_i))$} \\
+            \end{align*}
+        \item
+        	The posterior is approximately,
+        	$$
+        		\hat{p}(\ww|\Dc) \approx \Nc (\ww|\ww^*, H^{-1})
+        	$$
+        	Where $H = X^\T S X - \Vb_0^{-1}$
     \end{enumerate}
 \begin{solution}
     
@@ -62,6 +67,8 @@ function $E(\ww) = -\log\PP(\Dc|\ww) - \log\PP(\ww)$,
 \url{https://math189r.github.io/hw/data/classification.csv}. Consider the Laplace Approximated
 Bayesian Logistic Regression from Problem 1. Calculate the posterior distribution
 over $\ww$.
+
+\newpage
 
 \textbf{3 (Monte-Carlo Predictive Posterior)} From Problem 2 we have the distribution
 $\PP(\ww|\Dc)$. Now suppose we want to compute the probability that a test point $\xx$
@@ -93,5 +100,25 @@ a Gaussian, so we can sample from it easily.
         using this Monte Carlo approximation. You plot should look similar to Figure 8.6 in
         Murphy.
 \end{enumerate}
+
+\begin{solution}
+	\begin{enumerate}[(a)]
+		\item 
+			The definition of the dicrete expected value is
+			\begin{align*}
+				& \EE \left[\frac1S \sum_{s=1}^S f(\xx^{(s)}) \right] \\
+				&= \frac1S \sum_{s=1}^S \EE [f(\xx^{(s)})] \\
+				&= \frac1S \sum_{s=1}^S \EE [f(\xx)] \text{ Because distributed the same} \\
+				&= \frac{S}{S} \EE [f(\xx)] \text{ As desired}
+			\end{align*}
+		\item
+			The variance is 
+			\begin{align*}
+				\EE \left[ \left(\frac1S \sum_{s=1}^S f(\xx^{(s)})\right)^2 \right]- \EE \left[\frac1S \sum_{s=1}^S f(\xx^{(s)}) \right]^2
+				&\propto \frac{1}{S^2} \text{ Because $\EE$ is linear operator.}
+			\end{align*}
+			Which is proportional to $\frac1S$ once we multiply by $S$.
+	\end{enumerate}
+\end{solution}
 
 \end{document}
