@@ -1,3 +1,5 @@
+function Final1
+
 function X = Final1(c)
     a = dir('DAILY');
     b = {a.name};
@@ -50,13 +52,16 @@ function sharpe = gauss_gp(y)
     
     hyp2 = minimize(hyp, @gp, -100, @infGaussLik, meanfunc, covfunc, likfunc, x, y);
     
-    xs = [n+1] % next time step
+    xs = [n+1]; % next time step
     
     [mu var] = gp(hyp2, @infGaussLik, meanfunc, covfunc, likfunc, x, y, xs);
     
-    sharpe = mu[1] / var[1];
-    
+    sharpe = mu(1) / var(1);
+end
 
+x = [1 2 3];
+gauss_gp(x)
 
+end
 
 
