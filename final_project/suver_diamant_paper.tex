@@ -9,6 +9,9 @@
 
 \usepackage[final]{nips_2016}
 
+\include{bibliography.bib}
+
+
 % to compile a camera-ready version, add the [final] option, e.g.:
 % \usepackage[final]{nips_2016}
 
@@ -20,8 +23,12 @@
 \usepackage{amsfonts}       % blackboard math symbols
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
+\usepackage{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools}
+\usepackage{float}
 
-\title{The Spectral Density Kernel and Portfolio Optimization}
+\title{Gaussian Processes and Portfolio Optimization}
 
 \author{
   Nathaniel L. Diamant \\
@@ -45,96 +52,110 @@
 \section{Introduction}
 \label{intro}
 
-Discuss GPs and spectral density in vague terms and introduce our goals.
+The goal of this paper is to create an optimum short term stock portfolio.  Our approach is based on an idea called the Sharpe Ratio.  The Sharpe Ratio is defined as the expected return of a stock divided by the variance.  This has historically been considered as a good measure of how "good" a stock.  Our approach is to use a portfolio optimization problem that maximizes a measure similar to the Sharpe Ratio for a portfolio.  We first attempted to compute the maximum of the log of the Sharpe Ratio, but as we will show, this created a non-convex optimization problem, which would be impractical for a short-term optimization problem.  
+
+To fix this problem we will instead use a convex combination of the negative of the return value, and the positive of the variance value, and minimize this.  This means that we will be maximizing the return value and minimizing the variance of the stocks in our portfolio, trying different weights to the importance of these two values.
 
 \subsection{Gaussian Processes (GPs)}
 
-\subsection{Spectral Mixture Kernel}
+A Gaussian process is a collection of random variables, each of which has a joint Gaussian distribution.  Running the Gaussian process will generate a distribution over functions $f(x)$,
+\begin{equation}
+	f(x) \sim \mathcal{GP}(m(x), \kappa(x, x')
+    \label{eqn:GP}
+\end{equation}
+
+where $x \in \mathcal{R}^P$ is an input variable, $m(x)$ is the mean function ($\mathcal{E}[f(x)]$) and $\kappa (\textbf{x}, \textbf{x}')$ is the covariance kernel.  
+
+The kernel is a function which defines the distance between any two points in our data set. In our case we used the RBF kernel which is defined as
+\begin{equation}
+	\kappa (\textbf{x}, \textbf{x}') = \exp \left( - \frac{\|\textbf{x} - \textbf{x}' \|^2}{2\sigma^2} \right).
+    \label{eqn:RBF}
+\end{equation}
+We use this kernel because it is a standard kernel, and gives smooth interpolation and easily interpretable variances. 
+
+Any collection of Gaussian process functions has a joint Gaussian distribution, so from this method we can infer a posterior predictive distribution over Gaussian process functions, and analyticaly derive a marginal likelihood of the function values given the hyperparameters. \cite{spectral}
+
 
 \subsection{Portfolio Optimization}
 
-\subsection{Portfolio optimization}
+Modern portfolio theory defines a quadratic programming problem for optimizing a portfolio as
+\begin{alignat*}{2}
+    \text{minimize }   &   \textbf{w}^\top \mathbf{\Sigma} \textbf{w}\\
+    \text{subject to } & \sum_i w_i E_i \geq R \\
+    & \textbf{1}^\top \textbf{w} = 1 \\
+    & \textbf{w} \underline{\succ} 0
+\end{alignat*}
+where $E_i$ are the expected values for our individual stocks, $\textbf{w}$ is the weights matrix, and $\mathbf{\Sigma}$ is the covariance matrix for our data. What this program is capturing is the idea that we want to minimize the correlations between the stocks we choose for our portfolio to make it diverse.  However we want to ensure that we are getting a positive return on our portfolio, so we add a constraint that the returns $\left(\sum_i w_i E_i \right)$ are at least some constant $R$.  
+
+We decided to not use this same optimization problem, because it settles for having the expected returns simply be better than a constant, and we want to use the expected returns from our Gaussian process to give the best possible portfolio.  Because of this, we decided to change the optimization problem to a convex combination of the returns and variances, which captures the essence of the Sharpe ratio, but also allows a user to define whether they want their portfolio to focus more on diversity or expected returns.  
+
 
 \section{Background}
 \label{background}
 
-Here we introduce the math of GPs and the spectral density kernel
+\begin{alignat*}{2}
+    \text{minimize }   &   -\theta p^\top \textbf{w} + (1-\theta)\textbf{w}^\top \mathbf{\Sigma} \textbf{w}\\
+    \text{subject to } & \sum_i w_i E_i \geq R \\
+    & \textbf{1}^\top \textbf{w} = 1 \\
+    & \textbf{w} \underline{\succ} 0
+\end{alignat*}
 
-\section{Problem formulation}
-\label{problem}
 
-\subsection{GP application}
 
-Here we explain how we use the spectral density kernel and our optimization strategy.
 
-\subsection{Optimization}
 
 \section{Experiments}
 \label{exper}
 
-The results of our optimization.
+We ran our formula against daily stock data that was scraped from Yahoo finance from an anonymous donor.  The data set had daily stock data starting in January 2000, for 7,420 different stocks.  In order to formulate tests for our data we needed to select samples of the stocks in our data set and run them with different $\theta$ values.  This would allow us to find an optimal value for $\theta$. Which we could then use to test our data.  
 
-\subsection{Citations within the text}
+In order to test our effectiveness on individual stocks, we cut the data into training and testing sets, then used the training data to predict the first data point in the testing set. We then compute the return we got with our prediction, add it to a list of returns, then repeat this by moving the point we just predicted into the training set and predicting the next point.  With the list of returns we get, we can multiply them all together to get the return over the time period we checked.
 
 \subsection{Figures}
 
-\begin{figure}[h]
-  \centering
-  \fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
-  \caption{Sample figure caption.}
+\begin{figure}[H]
+  \includegraphics[scale=.5]{theta_1returns.png}
+  \caption{A plot of the daily and cumulative returns of our algorithm when run on a random set of 100 stocks for 100 days.  The $\theta$ parameter was randomly chosen to be .1.}
 \end{figure}
+In Figure 1, we tested our data set over a 100 day period using 100 randomly selected stocks, simulating how our algorithm would perform in a real trading situation.  We selected the $\theta$ parameter to be .1 for the sake of testing, which means that the returns were weighted much less than the variances of the stocks.  This test resulted in an $18\%$ gain in our portfolio in 100 days, but the rise in price was not constant.  However if you look at the S\&P 500 for the period that we are predicting for (March to June 2016) the market does dip down at roughly the same point as our strategy, so it's not too surprising that we would lose money at this point. However, this is much more intense dip in price than the S\&P 500 took, but also a much bigger rise after the fact.
 
-\subsection{Tables}
+On 
 
-Note that publication-quality tables \emph{do not contain vertical
-  rules.} We strongly suggest the use of the \verb+booktabs+ package,
-which allows for typesetting high-quality, professional tables:
-\begin{center}
-  \url{https://www.ctan.org/pkg/booktabs}
-\end{center}
-This package was used to typeset Table~\ref{sample-table}.
+\subsection{Analysis of Results}
 
-\begin{table}[t]
-  \caption{Sample table title}
-  \label{sample-table}
-  \centering
-  \begin{tabular}{lll}
-    \toprule
-    \multicolumn{2}{c}{Part}                   \\
-    \cmidrule{1-2}
-    Name     & Description     & Size ($\mu$m) \\
-    \midrule
-    Dendrite & Input terminal  & $\sim$100     \\
-    Axon     & Output terminal & $\sim$10      \\
-    Soma     & Cell body       & up to $10^6$  \\
-    \bottomrule
-  \end{tabular}
-\end{table}
+The results that we got do end up having a surprising amount of sparsity.  On a small test we did of 48 stocks, we only had 12 stocks that we put more than $1\%$ of our investment into.  When we scale the number of stocks up to 1000, we get that only 2 stocks take up more than $1\%$ of our investment each and combined they make up more than $99\%$ of our investment. There are also only 16 stocks that take up more than $.1\%$ of our investment.  This is a useful result because it means we only have to invest our money into a few stocks each day, which will minimize the effect of market friction on our trading strategy.
+
+
+
+
+
+
+
+
+
 
 \section{Discussion}
 \label{discuss}
 
 Describe results and potential future work.
 
-\begin{itemize}
+\subsection{Results}
 
-\item The \verb+\bbold+ package almost always uses bitmap fonts.  You
-  should use the equivalent AMS Fonts:
-\begin{verbatim}
-   \usepackage{amsfonts}
-\end{verbatim}
-followed by, e.g., \verb+\mathbb{R}+, \verb+\mathbb{N}+, or
-\verb+\mathbb{C}+ for $\mathbb{R}$, $\mathbb{N}$ or $\mathbb{C}$.  You
-can also use the following workaround for reals, natural and complex:
-\begin{verbatim}
-   \newcommand{\RR}{I\!\!R} %real numbers
-   \newcommand{\Nat}{I\!\!N} %natural numbers
-   \newcommand{\CC}{I\!\!\!\!C} %complex numbers
-\end{verbatim}
+The fact that when we run the data on 1000 stocks we end up with 2 stocks making up $90\%$ of our investment seems to indicate a problem with the covariance optimization 
 
-\end{itemize}
+\subsection{Future Work}
 
-\cite{spectral}
+There are several possible changes we could make to our algorithm to make it potentially more efficient.  
+
+One of these would be to try using a Student-t Process instead of a Gaussian Process for prediction \cite{student-t}.  The benefit of this is that each data point would be represented as a Student-t distribution rather than a Gaussian distribution, and Stocks are generally considered to more closely follow the Student-t distribution.  It would also probably be worthwhile to attempt this problem with several other types of distributions, and see which one gives the best result.  
+
+Another potential improvement would be to try out different Kernels instead of the RBF Kernel.  One that would be specifically good for this would be the Spectral Mixture Kernel. \cite{spectral} With this Kernel we would better capture the periodic and exponential behavior of the Stock market.
+
+We also would like to find a better way to optimize our hyperparameter $\theta$.  Our current approach is to run it over multiple days with multiple stocks, and brute force search for the most successful thetas.  This is effective, but incredibly slow.  With this approach it is unreasonable to train $\theta$ for every stock that we have, over a reasonable number of days, which leads to a non-optimal value for $\theta$.  A simple solution would be to just run this on a bigger machine, because then we could calculate $\theta$ in more reasonable time. 
+
+It would also be very important to find a better way to combine the covariance of the stock data and variance of the Gaussian Process.  Currently our approach is to create a weighted sum of covariance matrix and a diagonal matrix of the variances. However we chose a random weighting of the sums, because if we optimized the weightings, the run time would be made significantly slower. If we had a more powerful machine we could definitely optimize for this parameter and $\theta$, which would probably give a better result.
+
+
 
 \bibliographystyle{unsrt}
 \bibliography{bibliography}
