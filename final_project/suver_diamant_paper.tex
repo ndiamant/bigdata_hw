@@ -64,14 +64,9 @@ A Gaussian process is a collection of random variables, each of which has a join
     \label{eqn:GP}
 \end{equation}
 
-where $x \in \mathcal{R}^P$ is an input variable, $m(x)$ is the mean function ($\mathcal{E}[f(x)]$) and $\kappa (\textbf{x}, \textbf{x}')$ is the covariance kernel.  
+where $x \in \mathcal{R}^P$ is an input variable, $m(x)$ is the mean function ($\mathbb{E}[f(x)]$) and $\kappa (\textbf{x}, \textbf{x}')$ is the covariance kernel.  
 
-The kernel is a function which defines the distance between any two points in our data set. In our case we used the RBF kernel which is defined as
-\begin{equation}
-	\kappa (\textbf{x}, \textbf{x}') = \exp \left( - \frac{\|\textbf{x} - \textbf{x}' \|^2}{2\sigma^2} \right).
-    \label{eqn:RBF}
-\end{equation}
-We use this kernel because it is a standard kernel, and gives smooth interpolation and easily interpretable variances. 
+The kernel is a function which defines the distance between any two points in our data set. In our case we used the RBF kernel, sometimes known as the Squared Exponential Kernel. We use this kernel because it is a standard kernel, and gives smooth interpolation and easily interpretable variances. 
 
 Any collection of Gaussian process functions has a joint Gaussian distribution, so from this method we can infer a posterior predictive distribution over Gaussian process functions, and analyticaly derive a marginal likelihood of the function values given the hyperparameters. \cite{spectral}
 
@@ -92,13 +87,29 @@ We decided to not use this same optimization problem, because it settles for hav
 
 \section{Background}
 \label{background}
+The first main step of our algorithm is to compute the average returns and covariances of our function using a Gaussian Process.  As stated in the introduction we used the RBF Kernel for our testing.  This kernel is defined as 
+\begin{equation}
+	\kappa (\textbf{x}, \textbf{x}') = \exp \left( - \frac{\|\textbf{x} - \textbf{x}' \|^2}{2\sigma^2} \right).
+    \label{eqn:RBF}
+\end{equation}
+We said above that this kernel is a very commonly used kernel function.  The benefit of this kernel is that it acts as a smoothing device for the data, allowing us to interpret a value for $\sigma$, because we're essentially measuring the speed of the variation between $\textbf{x}$ and $\textbf{x}'$, which is the variance.
 
+The next step is in the portfolio optimization.  Part of our problem is reformulating this optimization problem is to reformulate the objective as to account for how high we want the returns.  Because we want our data to reflect the idea of the Sharpe Ratio, the best objective function we could use would be, using the same notation as above,
 \begin{alignat*}{2}
-    \text{minimize }   &   -\theta p^\top \textbf{w} + (1-\theta)\textbf{w}^\top \mathbf{\Sigma} \textbf{w}\\
-    \text{subject to } & \sum_i w_i E_i \geq R \\
+    \text{minimize }   &   \textbf{E}^\top \textbf{w} (\textbf{w}^\top \mathbf{\Sigma} \textbf{w})^{-1}\\
+    \text{subject to } 
     & \textbf{1}^\top \textbf{w} = 1 \\
     & \textbf{w} \underline{\succ} 0
 \end{alignat*}
+Because this captures the idea that our function is the Sharpe Ratio because we have the returns ($\textbf{E}^\top \textbf{w}$) times the inverse of the variances ($(\textbf{w}^\top \mathbf{\Sigma} \textbf{w})^{-1})$ which is like dividing them.  However this function is not feasible to use on a large data set so it is not convex.  Because of this we will reformat our optimization problem to be
+\begin{equation}
+\begin{array}{ll@{}ll}
+\text{minimize}  & \displaystyle -\theta \textbf{E}^\top \textbf{w} + (1-\theta)\textbf{w}^\top \mathbf{\Sigma} \textbf{w} &\\
+\text{subject to}& \displaystyle\textbf{1}^\top \textbf{w} = 1 \\
+                 &  \textbf{w} \underline{\succ} 0                                     
+\end{array}
+\end{equation}
+where $\theta$ is some constant where $0 \leq \theta \leq 1$. This objective fixes the issue of being non-convex by doing a convex combination of two things which we know to be convex.  While it doesn't give the exact measure of the Sharpe Ratio, it does take into account both the expected returns and variance.  We can then optimize the value of $\theta$ to ensure that we get the best possible return each time.  In addition, this gives the user control over how much they want their portfolio to be weighted by the returns or variance, so that a user could customize to an investment strategy best suited for them.
 
 
 
@@ -111,7 +122,10 @@ We ran our formula against daily stock data that was scraped from Yahoo finance 
 
 In order to test our effectiveness on individual stocks, we cut the data into training and testing sets, then used the training data to predict the first data point in the testing set. We then compute the return we got with our prediction, add it to a list of returns, then repeat this by moving the point we just predicted into the training set and predicting the next point.  With the list of returns we get, we can multiply them all together to get the return over the time period we checked.
 
-\subsection{Figures}
+
+\subsection{Using Optimal Weightings}
+
+\subsection{Weighting for Variance}
 
 \begin{figure}[H]
   \includegraphics[scale=.5]{theta_1returns.png}
@@ -121,16 +135,7 @@ In Figure 1, we tested our data set over a 100 day period using 100 randomly sel
 
 On 
 
-\subsection{Analysis of Results}
-
-The results that we got do end up having a surprising amount of sparsity.  On a small test we did of 48 stocks, we only had 12 stocks that we put more than $1\%$ of our investment into.  When we scale the number of stocks up to 1000, we get that only 2 stocks take up more than $1\%$ of our investment each and combined they make up more than $99\%$ of our investment. There are also only 16 stocks that take up more than $.1\%$ of our investment.  This is a useful result because it means we only have to invest our money into a few stocks each day, which will minimize the effect of market friction on our trading strategy.
-
-
-
-
-
-
-
+\subsection{Compare to Weighting for Returns}
 
 
 
@@ -141,7 +146,9 @@ Describe results and potential future work.
 
 \subsection{Results}
 
-The fact that when we run the data on 1000 stocks we end up with 2 stocks making up $90\%$ of our investment seems to indicate a problem with the covariance optimization 
+The results that we got do end up having a surprising amount of sparsity.  On a small test we did of 48 stocks, we only had 12 stocks that we put more than $1\%$ of our investment into.  When we scale the number of stocks up to 1000, we get that only 2 stocks take up more than $1\%$ of our investment each and combined they make up more than $99\%$ of our investment. There are also only 16 stocks that take up more than $.1\%$ of our investment.  This is a useful result because it means we only have to invest our money into a few stocks each day, which will minimize the effect of market friction on our trading strategy.
+
+While in some ways this is a positive result, it also might indicate an issue with how well the covariance optimization is working.  If we pick 2 stocks, even for a one day period, we most likely are not diversifying our portfolio as we would like.  However, our algorithm still is able to pick out stocks that are good enough that they can make up the majority of a portfolio and still be profitable, which is a good sign.
 
 \subsection{Future Work}
 
